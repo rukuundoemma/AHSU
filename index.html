@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#1B4F8A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>AHSU Attendance System - Professional Dashboard</title>
+<title>AHSU Attendance System - Supabase Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -136,7 +136,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
       <button class="tab"     onclick="adminTab('links')">2 · Sharing Gateways</button>
       <button class="tab"     onclick="adminTab('track')">3 · Tracking &amp; Analytics</button>
       <button class="tab"     onclick="adminTab('history')">4 · Archives</button>
-      <button class="tab"     onclick="adminTab('connect')" id="sheets-gear-btn">⚙ Cloud Sheets Connect</button>
+      <button class="tab"     onclick="adminTab('connect')" id="supabase-gear-btn">⚡️ Supabase Sync Connect</button>
     </div>
 
     <div id="at-setup">
@@ -228,8 +228,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
 
     <div id="at-track" class="hidden">
       <div id="track-conn-bar" class="conn-bar" style="background:var(--blue-pale); border:1px solid var(--blue-border); display:flex; align-items:center; gap:10px; padding:10px; border-radius:6px; margin-bottom:16px;">
-        <span style="font-size:13px;">🔄 Polling Core Link Engine active. Automated synchronization operational loops operational.</span>
-        <button class="btn btn-outline btn-sm" onclick="refreshFromSheets()" style="margin-left:auto;">Force Sync Refresh</button>
+        <span style="font-size:13px;">🔄 Connected to Supabase Engine Cloud Infrastructure. Polling logic active.</span>
+        <button class="btn btn-outline btn-sm" onclick="refreshFromSupabase()" style="margin-left:auto;">Force Sync Refresh</button>
       </div>
 
       <div class="sg">
@@ -272,24 +272,25 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
 
     <div id="at-connect" class="hidden">
       <div class="card">
-        <div class="card-title">Google Sheets Integration Sync Layer</div>
-        <p style="font-size:13px; margin-bottom:12px;">Paste your deployment script endpoint to map cloud synchronization pipelines:</p>
-        <input type="url" id="sheets-url" placeholder="https://script.google.com/macros/s/.../exec" style="font-family:var(--mono); font-size:12px; margin-bottom:12px;">
+        <div class="card-title">Supabase Database Integration Sync Layer</div>
+        <p style="font-size:13px; margin-bottom:12px;">Your secure workspace data transmission credentials are loaded below:</p>
+        
+        <label>Supabase REST API URL Endpoint</label>
+        <input type="url" id="sb-url" style="font-family:var(--mono); font-size:12px; margin-bottom:12px;">
+        
+        <label>Supabase Anon Key API Token String</label>
+        <input type="text" id="sb-key" style="font-family:var(--mono); font-size:12px; margin-bottom:12px;">
+        
         <div class="btns">
-          <button class="btn btn-primary" onclick="saveSheetsConfigurationLink()">Secure Link Path Mapping</button>
-          <button class="btn btn-outline" onclick="toggleInstructionsBlock()">📋 Script Setup Instructions</button>
+          <button class="btn btn-primary" onclick="saveSupabaseConfigurationLink()">Update Core Cloud Connection</button>
+          <button class="btn btn-outline" onclick="toggleInstructionsBlock()">📋 View SQL Table Creation Code</button>
         </div>
         
         <div id="instructions-panel" class="doc-box hidden">
-          <h4 style="margin-bottom:6px;">Google Apps Script Integration Instructions</h4>
-          <ol style="margin-left:20px; margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
-            <li>Create or open a tracking target spreadsheet in Google Drive.</li>
-            <li>Navigate through <strong>Extensions &gt; Apps Script</strong>.</li>
-            <li>Wipe out default empty boilerplate text and insert the system code implementation block below.</li>
-            <li>Click <strong>Deploy &gt; New Deployment</strong>, choose <strong>Web App</strong>, change Access to <strong>"Anyone"</strong>, then copy the generated production string into the form field above.</li>
-          </ol>
-          <button class="btn btn-outline btn-sm" style="margin-bottom:6px;" onclick="copyMacroCodeBlock()">Copy Code to Clipboard</button>
-          <pre id="macro-code" class="code-box" style="white-space:pre-wrap; max-height:220px; overflow-y:auto; background:var(--gray-50);"></pre>
+          <h4 style="margin-bottom:6px;">SQL Schema Setup Script</h4>
+          <p style="font-size:12px; margin-bottom:8px; color:var(--gray-600);">Paste the statement below directly into your Supabase SQL Editor workspace to instantiate your operational environment tables correctly:</p>
+          <button class="btn btn-outline btn-sm" style="margin-bottom:6px;" onclick="copySQLSchemaCode()">Copy SQL to Clipboard</button>
+          <pre id="sql-code" class="code-box" style="white-space:pre-wrap; max-height:220px; overflow-y:auto; background:var(--gray-50);"></pre>
         </div>
       </div>
     </div>
@@ -326,45 +327,34 @@ const ChimeAudioContextEngine = {
   }
 };
 
-const MacroDeploymentString = `function doPost(e) {
-  var lock = LockService.getScriptLock();
-  try {
-    lock.waitLock(10000);
-    var payload = JSON.parse(e.postData.contents);
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    
-    if (payload.action === 'pull') {
-      var data = sheet.getDataRange().getValues();
-      var matchingRecords = [];
-      for (var i = 1; i < data.length; i++) {
-        if (data[i][0] == payload.sessionKey) {
-          matchingRecords.push({
-            id: data[i][1],
-            name: data[i][2],
-            role: data[i][3] || 'Resident',
-            time: data[i][4]
-          });
-        }
-      }
-      return ContentService.createTextOutput(JSON.stringify({status: 'success', records: matchingRecords}))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-  } catch(error) {
-    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: error.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  } finally {
-    lock.releaseLock();
-  }
-}`;
+const SQLSchemaString = `create table session_attendance (
+  id bigint generated always as identity primary key,
+  session_key text not null,
+  course_name text not null,
+  lecturer text not null,
+  facilitator text not null,
+  badge_id text not null,
+  full_name text not null,
+  role_designation text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table session_attendance enable row level security;
+create policy "Allow open anonymous inserts" on session_attendance for insert with check (true);
+create policy "Allow open anonymous reads" on session_attendance for select using (true);`;
 </script>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
-// DUAL-DESIGNATION BUSINESS SYSTEM CORE APPLICATION LOGIC
+// SUPABASE LIVE GATEWAY CORE LOGIC
 // ═══════════════════════════════════════════════════════════════════
 let DEPT = 'GEN';
 let facultyAndResidentsRoster = [];
-let sheetsURL = localStorage.getItem('ahsu_GEN_sheets_url') || '';
+
+// Automated injection of user environmental configuration keys
+let supabaseURL = localStorage.getItem('ahsu_sb_url') || 'https://rxvtgleahdweedfiaxtq.supabase.co';
+let supabaseAnonKey = localStorage.getItem('ahsu_sb_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4dnRnbGVhaGR3ZWVkZmlheHRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxODUzNDMsImV4cCI6MjA5NDc2MTM0M30.0XClhE4g4S6bZ-pgVRXB-zHQUEGqKitq1_OSqyRc2fY';
+
 let timerSecondsDuration = 1800;
 let isTimerRunning = true;
 let timerSystemIntervalReference = null;
@@ -373,7 +363,9 @@ function ns(k) { return 'ahsu_' + DEPT + '_' + k; }
 
 function initApplicationFramework() {
   document.getElementById('a-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('macro-code').textContent = MacroDeploymentString;
+  document.getElementById('sql-code').textContent = SQLSchemaString;
+  document.getElementById('sb-url').value = supabaseURL;
+  document.getElementById('sb-key').value = supabaseAnonKey;
   genPass();
   loadCachedSystemConfiguration();
   initializeTimerCountdownLoop();
@@ -384,7 +376,7 @@ function initApplicationFramework() {
 
 function loadCachedSystemConfiguration() {
   try {
-    const dataString = localStorage.getItem(ns('session_v2'));
+    const dataString = localStorage.getItem(ns('session_v3'));
     if (dataString) {
       const data = JSON.parse(dataString);
       document.getElementById('a-course').value = data.course || 'Introduction to Public Health';
@@ -395,7 +387,7 @@ function loadCachedSystemConfiguration() {
       document.getElementById('a-pass').value = data.password || '';
       facultyAndResidentsRoster = Array.isArray(data.people) ? data.people : [];
     }
-  } catch(e) { console.error("Cached restore array verification failure", e); }
+  } catch(e) { console.error("Cached restore verification failure", e); }
   renderResidentRegistryDOM();
 }
 
@@ -410,7 +402,7 @@ function persistAppStateToLocalSandbox() {
     password: document.getElementById('a-pass').value,
     people: facultyAndResidentsRoster
   };
-  localStorage.setItem(ns('session_v2'), JSON.stringify(meta));
+  localStorage.setItem(ns('session_v3'), JSON.stringify(meta));
 }
 
 function adminTab(targetPane) {
@@ -442,12 +434,12 @@ function toggleInstructionsBlock() {
   document.getElementById('instructions-panel').classList.toggle('hidden');
 }
 
-function copyMacroCodeBlock() {
-  navigator.clipboard.writeText(MacroDeploymentString);
-  showToast("Apps Script codebase cached to clipboard!");
+function copySQLSchemaCode() {
+  navigator.clipboard.writeText(SQLSchemaString);
+  showToast("SQL statements copied!");
 }
 
-// Timer Systems
+// Timer Engine
 function initializeTimerCountdownLoop() {
   if (timerSystemIntervalReference) clearInterval(timerSystemIntervalReference);
   timerSystemIntervalReference = setInterval(() => {
@@ -510,7 +502,7 @@ function updateLinks() {
 function copyLink() { navigator.clipboard.writeText(document.getElementById('session-link').textContent); showToast('Access link saved!'); }
 function copyWA() { navigator.clipboard.writeText(document.getElementById('wa-template').textContent); showToast('Message block copied!'); }
 
-// Add records
+// Roster Modifications
 function addPersonRecord() {
   const nameInput = document.getElementById('s-name'); const idInput = document.getElementById('s-id'); const roleInput = document.getElementById('s-role');
   const n = nameInput.value.trim(); const id = idInput.value.trim().toUpperCase(); const r = roleInput.value;
@@ -556,7 +548,7 @@ function removeRosterItem(index) {
   persistAppStateToLocalSandbox();
 }
 
-// Processing Updates
+// Calculations Engine
 function updateTrack() {
   const resPool = facultyAndResidentsRoster.filter(x => x.role === 'Resident');
   const presentRes = resPool.filter(x => x.signed).length;
@@ -605,36 +597,54 @@ function filterRegistryLogs() {
   executeTrackingViewRenderer(filtered);
 }
 
-function saveSheetsConfigurationLink() {
-  const link = document.getElementById('sheets-url').value.trim();
-  if(!link) return;
-  localStorage.setItem('ahsu_GEN_sheets_url', link);
-  sheetsURL = link;
-  showToast("Cloud processing routes initialized.");
+// Configuration Modifications
+function saveSupabaseConfigurationLink() {
+  const u = document.getElementById('sb-url').value.trim();
+  const k = document.getElementById('sb-key').value.trim();
+  if(!u || !k) { alert("Missing parameters."); return; }
+  localStorage.setItem('ahsu_sb_url', u);
+  localStorage.setItem('ahsu_sb_key', k);
+  supabaseURL = u;
+  supabaseAnonKey = k;
+  showToast("Supabase target parameters securely updated.");
 }
 
-async function refreshFromSheets() {
-  if(!sheetsURL) return;
+// Dynamic Supabase Network Synchronizer Implementation Layer
+async function refreshFromSupabase() {
+  if(!supabaseURL || !supabaseAnonKey) return;
   try {
     const sessionToken = document.getElementById('a-code').value + '-' + document.getElementById('a-date').value;
-    const res = await fetch(sheetsURL, {
-      method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'pull', sessionKey: sessionToken })
-    });
-    if(!res.ok) throw new Error("Synchronization Exception Context");
-    const parsed = await res.json();
     
-    if(parsed && parsed.status === 'success' && Array.isArray(parsed.records)) {
+    // Construct structural GET API call filtering columns by current unique identifier session key string
+    const targetEndpoint = `${supabaseURL}/rest/v1/session_attendance?session_key=eq.${encodeURIComponent(sessionToken)}&select=*`;
+    
+    const response = await fetch(targetEndpoint, {
+      method: 'GET',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if(!response.ok) throw new Error("Supabase context fetch request rejected.");
+    const logs = await response.json();
+    
+    if(Array.isArray(logs)) {
       let structuralMutationOccurred = false;
-      parsed.records.forEach(cloudRow => {
-        let node = facultyAndResidentsRoster.find(x => x.id.toUpperCase() === cloudRow.id.trim().toUpperCase());
+      logs.forEach(row => {
+        let node = facultyAndResidentsRoster.find(x => x.id.toUpperCase() === row.badge_id.trim().toUpperCase());
+        
+        // Parse UTC timestamp arrays to user localized time string mappings
+        const logLocalTime = new Date(row.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
         if(!node) {
-          node = { id: cloudRow.id, name: cloudRow.name, role: cloudRow.role || 'Resident', signed: true, time: cloudRow.time };
+          node = { id: row.badge_id, name: row.full_name, role: row.role_designation || 'Resident', signed: true, time: logLocalTime };
           facultyAndResidentsRoster.push(node);
           structuralMutationOccurred = true;
         } else if(!node.signed) {
           node.signed = true;
-          node.time = cloudRow.time;
+          node.time = logLocalTime;
           structuralMutationOccurred = true;
         }
       });
@@ -644,22 +654,23 @@ async function refreshFromSheets() {
         persistAppStateToLocalSandbox();
         updateTrack();
         renderResidentRegistryDOM();
-        showToast("Session logs updated from cloud layer.");
+        showToast("Synchronized incoming matrix signatures from Supabase cloud.");
       }
     }
-  } catch(e) { console.warn("Background loop processing safely bypassed."); }
+  } catch(e) { console.warn("Supabase network polling pipeline safely skipped.", e); }
 }
 
-setInterval(refreshFromSheets, 10000);
+// Instantiate short auto-polling loop interval cycles
+setInterval(refreshFromSupabase, 8000);
 
 function exportCSV() {
-  const matrix = [['Index', 'Role Designation', 'Identification Badge', 'Full Name Name', 'Status Metric', 'Timestamp Logged']];
+  const matrix = [['Index', 'Role Designation', 'Identification Badge', 'Full Name', 'Status Metric', 'Timestamp Logged']];
   facultyAndResidentsRoster.forEach((p, i) => {
     matrix.push([i + 1, p.role, p.id, p.name, p.signed ? 'Present' : 'Absent', p.time || '—']);
   });
   const csvStr = matrix.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csvStr], { type: 'text/csv;charset=utf-8;' }));
-  a.setAttribute("download", `AHSU_Unified_Attendance_${document.getElementById('a-code').value}.csv`);
+  a.setAttribute("download", `AHSU_Supabase_Attendance_${document.getElementById('a-code').value}.csv`);
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
@@ -675,25 +686,30 @@ function clearSession() {
 function autoArchiveData() {
   if(!facultyAndResidentsRoster.length) return;
   try {
-    const archive = JSON.parse(localStorage.getItem(ns('archive_v2')) || '[]');
+    const archive = JSON.parse(localStorage.getItem(ns('archive_v3')) || '[]');
     archive.unshift({
       course: document.getElementById('a-course').value, code: document.getElementById('a-code').value, date: document.getElementById('a-date').value,
       people: facultyAndResidentsRoster, archivedAt: new Date().toLocaleString()
     });
-    localStorage.setItem(ns('archive_v2'), JSON.stringify(archive));
+    localStorage.setItem(ns('archive_v3'), JSON.stringify(archive));
   } catch(e) { console.error("Archive system error trace cascade", e); }
 }
 
 function renderHistoryLogs() {
-  const archives = JSON.parse(localStorage.getItem(ns('archive_v2')) || '[]');
+  const archives = JSON.parse(localStorage.getItem(ns('archive_v3')) || '[]');
   let html = '';
   archives.forEach(item => {
     html += `<div class="card" style="padding:12px 16px; font-size:13px;">` +
               `<strong>${item.course} (${item.code})</strong><br>` +
-              `<span class="smeta">Timeline Context: ${item.archivedAt} | Check-ins: ${item.people.filter(x=>x.signed).length} Active Signature Nodes</span>` +
+              `<span class="smeta">Archived Context: ${item.archivedAt} | Check-ins: ${item.people.filter(x=>x.signed).length} Verified Attendees</span>` +
             `</div>`;
   });
   document.getElementById('history-list').innerHTML = html || '<p style="color:var(--gray-400); font-size:12px;">Persistent archives historical clear.</p>';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2000);
 }
 
 document.addEventListener("DOMContentLoaded", initApplicationFramework);
