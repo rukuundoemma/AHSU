@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#1B4F8A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>AHSU Attendance System - Supercharged Multi-Cloud Connect</title>
+<title>AHSU Attendance System - Professional Multi-Cloud Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -77,9 +77,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
 
 .badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:500;}
-.b-signed{background:var(--green-pale);color:var(--green);}
+.b-signed{background:var(--green-pale);color:var(--green);border:1px solid var(--green-border);}
 .b-faculty{background:var(--purple-pale);color:var(--purple);border:1px solid var(--purple-border);}
-.b-absent{background:var(--red-pale);color:var(--red);}
+.b-absent{background:var(--red-pale);color:var(--red);border:1px solid var(--red-border);}
 
 .srow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border-color);border-radius:var(--r-sm);margin-bottom:6px;background:var(--gray-50);}
 .av{width:34px;height:34px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
@@ -90,7 +90,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
 .sc{background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--r);padding:14px;text-align:center;box-shadow:var(--shadow);}
 .sn{font-size:26px;font-weight:600;} .sl{font-size:12px;color:var(--gray-400);margin-top:2px;}
 
-.code-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--gray-600);word-break:break-all;margin:8px 0;}
+.code-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--gray-600);word-break:break-all;margin:8px 0;}
 .wa-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:12px;font-size:13px;font-family:var(--mono);color:var(--gray-600);white-space:pre-wrap;line-height:1.6;margin:8px 0;}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;}
 .hidden{display:none!important;}
@@ -107,13 +107,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
 .toggle-control { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 13px; font-weight: 500; }
 .doc-box { background: var(--gray-100); border: 1px dashed var(--border-color); padding: 16px; border-radius: var(--r-sm); margin-top: 12px; font-size: 13px; }
 
-@media(max-width:768px){
+/* Grid Table Layouts for Logs */
+.log-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
+.log-table th, .log-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+.log-table th { background: var(--gray-100); font-weight: 600; color: var(--gray-600); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.log-table tbody tr:hover { background: var(--gray-50); }
+
+@media(max-width:768px) {
   .g2,.g3,.qr-modal-wrapper{grid-template-columns:1fr;}
   .sg{grid-template-columns:1fr 1fr;}
   .wrap{padding:14px 14px 60px;}
   .topbar{padding:0 14px;}
   .card{padding:14px 16px;}
   #qrcode { margin: 0 auto; }
+  .log-table th:nth-child(4), .log-table td:nth-child(4) { display: none; }
 }
 </style>
 </head>
@@ -138,7 +145,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
   <div class="wrap">
     <div class="tabs">
       <button class="tab on"  onclick="adminTab('setup')">1 · Setup</button>
-      <button class="tab"     onclick="adminTab('links')">2 · Sharing Gateways</button>
+      <button class="tab"     onclick="adminTab('links')">2 · Gateways</button>
       <button class="tab"     onclick="adminTab('track')">3 · Tracking &amp; Analytics</button>
       <button class="tab"     onclick="adminTab('history')">4 · Archives</button>
       <button class="tab"     onclick="adminTab('connect')" id="global-gear-btn">⚙ Cloud Sync Hub</button>
@@ -197,10 +204,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
         </div>
         <div id="stu-list" style="margin-top:14px;"></div>
       </div>
-      
-      <div class="btns">
-        <button class="btn btn-primary" onclick="adminTab('links')">Proceed to Sharing Channels →</button>
-      </div>
     </div>
 
     <div id="at-links" class="hidden">
@@ -233,7 +236,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
 
     <div id="at-track" class="hidden">
       <div id="track-conn-bar" class="conn-bar" style="background:var(--blue-pale); border:1px solid var(--blue-border); display:flex; align-items:center; gap:10px; padding:10px; border-radius:6px; margin-bottom:16px;">
-        <span style="font-size:13px;" id="sync-engine-banner">🔄 Polling Engine Active. Awaiting setup sync routing configuration parameters.</span>
+        <span style="font-size:13px;" id="sync-engine-banner">🔄 Pipeline status operational.</span>
         <button class="btn btn-outline btn-sm" onclick="forceGlobalCloudRefresh()" style="margin-left:auto;">Force Sync Refresh</button>
       </div>
 
@@ -244,27 +247,45 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
         <div class="sc"><div class="sn" style="color:var(--blue);" id="st-rate">0%</div><div class="sl">Resident Intake Rate</div></div>
       </div>
 
-      <div class="card">
-        <div class="card-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-          <span>Live Session Registry Log Stream</span>
+      <div class="card" style="padding:14px 20px; margin-bottom:16px;">
+        <div style="display:grid; grid-template-columns: 1fr auto; gap:12px;">
+          <input type="text" id="registry-search" placeholder="Search logs by name or badge string..." oninput="filterRegistryLogs()">
           <button class="btn btn-outline btn-sm" onclick="exportCSV()">CSV Data Export</button>
         </div>
+      </div>
 
-        <div style="display:grid; grid-template-columns: 1fr auto auto; gap:10px; margin-bottom:16px; margin-top:8px;">
-          <input type="text" id="registry-search" placeholder="Filter active logs by name or designation ID..." oninput="filterRegistryLogs()">
-          <select id="registry-filter-role" onchange="filterRegistryLogs()" style="width:130px;">
-            <option value="all">All Roles</option>
-            <option value="Resident">Residents</option>
-            <option value="Faculty">Faculty Only</option>
-          </select>
-          <select id="registry-filter-status" onchange="filterRegistryLogs()" style="width:130px;">
-            <option value="all">All Statuses</option>
-            <option value="present">Present</option>
-            <option value="absent">Absent</option>
-          </select>
-        </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--green);">📊 Cohort Residents Registry Stream</div>
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Badge ID</th>
+              <th>Full Name</th>
+              <th>Status</th>
+              <th>Timestamp Logged</th>
+            </tr>
+          </thead>
+          <tbody id="resident-tbody-logs">
+            <tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No residents registered.</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-        <div id="track-stu-list"></div>
+      <div class="card">
+        <div class="card-title" style="color:var(--purple);">🎓 Attending Faculty Registry Stream</div>
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Badge ID</th>
+              <th>Full Name</th>
+              <th>Status</th>
+              <th>Timestamp Logged</th>
+            </tr>
+          </thead>
+          <tbody id="faculty-tbody-logs">
+            <tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No faculty members detected.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -281,12 +302,36 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
           <span>Channel A: Google Apps Script Web App Connection</span>
           <div id="gas-ping-indicator" class="status-indicator si-unknown">Status: Unverified</div>
         </div>
-        <p style="font-size:13px; margin-bottom:12px;">Map or test your user Google Macro executable macro script link here:</p>
-        <input type="url" id="sheets-url" style="font-family:var(--mono); font-size:12px; margin-bottom:12px;">
+        <p style="font-size:13px; margin-bottom:12px;">Map your executable macro script link here:</p>
+        <input type="url" id="sheets-url" style="font-family:var(--mono); font-size:12px; margin-bottom:12px;" placeholder="https://script.google.com/macros/s/.../exec">
         <div class="btns">
           <button class="btn btn-primary btn-sm" onclick="saveGASConfigurationLink()">Secure Apps Script Link Route</button>
           <button class="btn btn-outline btn-sm" onclick="testGoogleScriptHandshake()">⚡️ Test &amp; Verify Handshake Connection</button>
         </div>
+        
+        <label style="margin-top:16px; color:var(--blue-l);">📄 Google Sheets Macro Source Code Execution Blueprint</label>
+        <p style="font-size:12px; color:var(--gray-600); margin-bottom:6px;">Create a Google Sheet, select <strong>Extensions &gt; Apps Script</strong>, clear out any default code, paste the script below, and click <strong>Save</strong>:</p>
+        <div class="code-box" style="white-space: pre; overflow-x: auto; max-height: 250px; text-align: left;">function doPost(e) {
+  try {
+    var packet = JSON.parse(e.postData.contents);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    if (packet.action === 'pull') {
+      var data = sheet.getDataRange().getValues();
+      var matches = [];
+      for (var i = 1; i &lt; data.length; i++) {
+        if (data[i][0] == packet.sessionKey) {
+          matches.push({ id: data[i][1], name: data[i][2], role: data[i][3], time: data[i][4] });
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: 'success', records: matches }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch(error) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}</div>
       </div>
 
       <div class="card">
@@ -334,15 +379,14 @@ const ChimeAudioContextEngine = {
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
-// DUAL DUAL-CONNECTOR MASTER CORE LOGIC
+// DUAL-CHANNEL MASTER CORE LOGIC (FIXED FOR REDIRECTS)
 // ═══════════════════════════════════════════════════════════════════
 let DEPT = 'GEN';
 let facultyAndResidentsRoster = [];
 
-// Fallback configuration default allocations
-let googleAppsScriptURL = localStorage.getItem('ahsu_gas_url') || 'https://script.google.com/macros/s/AKfycbwxf2x12SefjcOJuKoPQb4XtNQ6NZzmgNGEUXy1GWUPA5feYIXBuUsheu9dwAOqPkQy/exec';
-let supabaseURL = localStorage.getItem('ahsu_sb_url') || 'https://rxvtgleahdweedfiaxtq.supabase.co';
-let supabaseAnonKey = localStorage.getItem('ahsu_sb_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4dnRnbGVhaGR3ZWVkZmlheHRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxODUzNDMsImV4cCI6MjA5NDc2MTM0M30.0XClhE4g4S6bZ-pgVRXB-zHQUEGqKitq1_OSqyRc2fY';
+let googleAppsScriptURL = localStorage.getItem('ahsu_gas_url') || '';
+let supabaseURL = localStorage.getItem('ahsu_sb_url') || '';
+let supabaseAnonKey = localStorage.getItem('ahsu_sb_key') || '';
 
 let timerSecondsDuration = 1800;
 let isTimerRunning = true;
@@ -370,6 +414,8 @@ function updateDynamicSyncBannerTitle() {
     b.textContent = "⚡️ Active Gateway Pipeline: Supabase Enterprise Database Sync Active Engine Connected.";
   } else if(googleAppsScriptURL) {
     b.textContent = "📋 Active Gateway Pipeline: Google Apps Script Web App Engine Hook Connected.";
+  } else {
+    b.textContent = "🔄 Standalone Local Buffer Engine Active. Map Cloud Configurations to scale.";
   }
 }
 
@@ -380,6 +426,8 @@ function loadCachedSystemConfiguration() {
       const data = JSON.parse(dataString);
       document.getElementById('a-course').value = data.course || 'Introduction to Public Health';
       document.getElementById('a-code').value = data.code || 'IPH 101';
+      document.getElementById('a-date').value = data.date || document.getElementById('a-date').value;
+      document.getElementById('a-time').value = data.time || '09:00';
       document.getElementById('a-lec').value = data.lecturer || 'Dr. Uwimana';
       document.getElementById('a-fac').value = data.facilitator || 'Prof. Kamali';
       document.getElementById('a-expected').value = data.expectedPool || '25';
@@ -395,6 +443,7 @@ function persistAppStateToLocalSandbox() {
     course: document.getElementById('a-course').value,
     code: document.getElementById('a-code').value,
     date: document.getElementById('a-date').value,
+    time: document.getElementById('a-time').value,
     lecturer: document.getElementById('a-lec').value,
     facilitator: document.getElementById('a-fac').value,
     expectedPool: document.getElementById('a-expected').value,
@@ -404,7 +453,7 @@ function persistAppStateToLocalSandbox() {
   localStorage.setItem(ns('session_v4'), JSON.stringify(meta));
 }
 
-// Verification Handshakes Tools Panel
+// REDIRECT-COMPLIANT NETWORK HANDSHAKE FOR CHANNEL A
 async function testGoogleScriptHandshake() {
   const ind = document.getElementById('gas-ping-indicator');
   const userURL = document.getElementById('sheets-url').value.trim();
@@ -414,15 +463,19 @@ async function testGoogleScriptHandshake() {
   ind.textContent = "Testing Connection...";
   
   try {
-    // Fire structural request handshake mock payload
+    // Crucial change: text/plain prevents complex pre-flight header rejections, handling redirects automatically
     const res = await fetch(userURL, {
       method: 'POST',
       mode: 'cors',
-      headers: { 'Content-Type': 'text/plain' },
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'pull', sessionKey: 'PING-TEST' })
     });
     
-    if(res.ok) {
+    const rawText = await res.text();
+    let data = JSON.parse(rawText);
+    
+    if(res.ok || data.status === 'success' || data.status === 'error') {
       ind.className = "status-indicator si-success";
       ind.textContent = "CONNECTED (200 OK)";
       showToast("Handshake response verified successfully!");
@@ -432,7 +485,7 @@ async function testGoogleScriptHandshake() {
   } catch(e) {
     ind.className = "status-indicator si-error";
     ind.textContent = "FAILED (Network/CORS Error)";
-    alert("Verification Failure: Ensure you deployed your Web App correctly inside Apps Script with access configured for 'Anyone'.");
+    alert("Verification Failure: Ensure your deployment access permissions are explicitly set to 'Anyone'.");
   }
 }
 
@@ -477,14 +530,12 @@ function saveSupabaseConfigurationLink() {
   updateDynamicSyncBannerTitle();
 }
 
-// Multi-Backend Master Sync Loops Execution Layer
 async function forceGlobalCloudRefresh() {
   if (supabaseURL && supabaseAnonKey) {
     await fetchFromSupabasePipeline();
-  } else if (googleAppsScriptURL) {
+  }
+  if (googleAppsScriptURL) {
     await fetchFromGoogleScriptPipeline();
-  } else {
-    showToast("No active tracking endpoints map verified.");
   }
 }
 
@@ -504,10 +555,11 @@ async function fetchFromGoogleScriptPipeline() {
   try {
     const token = document.getElementById('a-code').value + '-' + document.getElementById('a-date').value;
     const res = await fetch(googleAppsScriptURL, {
-      method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain' },
+      method: 'POST', mode: 'cors', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'pull', sessionKey: token })
     });
-    const data = await res.json();
+    const rawText = await res.text();
+    const data = JSON.parse(rawText);
     if(data && data.status === 'success') processIncomingGenericPayloadRows(data.records);
   } catch(e){}
 }
@@ -530,10 +582,8 @@ function processIncomingGenericPayloadRows(standardizedArray) {
   }
 }
 
-// Master Interval Tick Poller Loops
-setInterval(forceGlobalCloudRefresh, 9000);
+setInterval(forceGlobalCloudRefresh, 10000);
 
-// Rest of Layout Application Code Infrastructure boilerplate UI Handlers
 function adminTab(targetPane) {
   ['setup', 'links', 'track', 'history', 'connect'].forEach(p => { document.getElementById('at-' + p).classList.add('hidden'); });
   document.getElementById('at-' + targetPane).classList.remove('hidden');
@@ -618,21 +668,52 @@ function updateTrack() {
   executeTrackingViewRenderer(facultyAndResidentsRoster);
 }
 
+// RENDERS THE DATA INTO TWO DISTINCT SEPARATE LOG TAB TABLES
 function executeTrackingViewRenderer(ds) {
-  let html = '';
-  ds.forEach(p => {
-    html += `<div class="srow"><div class="av">${p.role === 'Faculty' ? '🎓' : '👤'}</div><div style="flex:1;"><div class="sname">${p.name} <span class="smeta">(${p.id})</span></div><div class="smeta">${p.time ? '🕒 Token Logged: ' + p.time : '🔴 Waiting Connection Activity'}</div></div><div>${p.signed ? (p.role==='Faculty'?'<span class="badge b-faculty">✓ Faculty Logged</span>':'<span class="badge b-signed">✓ Present</span>') : '<span class="badge b-absent">Absent</span>'}</div></div>`;
-  });
-  document.getElementById('track-stu-list').innerHTML = html || '<p style="color:var(--gray-400); text-align:center;">No registry results match.</p>';
+  const query = document.getElementById('registry-search').value.toLowerCase().trim();
+  
+  // Filter Dataset by Search Term
+  const filtered = ds.filter(p => p.name.toLowerCase().includes(query) || p.id.toLowerCase().includes(query));
+  
+  // Isolate Categories
+  const residentsList = filtered.filter(p => p.role === 'Resident');
+  const facultyList = filtered.filter(p => p.role === 'Faculty');
+  
+  // Render Residents Table Rows
+  let resHtml = '';
+  if (residentsList.length === 0) {
+    resHtml = `<tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No residents match search criteria.</td></tr>`;
+  } else {
+    residentsList.forEach(p => {
+      resHtml += `<tr>
+        <td style="font-family:var(--mono); font-weight:500;">${p.id}</td>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.signed ? '<span class="badge b-signed">✓ Present</span>' : '<span class="badge b-absent">Absent</span>'}</td>
+        <td style="color:var(--gray-600); font-size:13px;">${p.time || '—'}</td>
+      </tr>`;
+    });
+  }
+  document.getElementById('resident-tbody-logs').innerHTML = resHtml;
+
+  // Render Faculty Table Rows
+  let facHtml = '';
+  if (facultyList.length === 0) {
+    facHtml = `<tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No faculty members match search criteria.</td></tr>`;
+  } else {
+    facultyList.forEach(p => {
+      facHtml += `<tr>
+        <td style="font-family:var(--mono); font-weight:500;">${p.id}</td>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.signed ? '<span class="badge b-faculty">✓ Logged</span>' : '<span class="badge b-absent">Absent</span>'}</td>
+        <td style="color:var(--gray-600); font-size:13px;">${p.time || '—'}</td>
+      </tr>`;
+    });
+  }
+  document.getElementById('faculty-tbody-logs').innerHTML = facHtml;
 }
 
 function filterRegistryLogs() {
-  const q = document.getElementById('registry-search').value.toLowerCase().trim();
-  const rf = document.getElementById('registry-filter-role').value;
-  const sf = document.getElementById('registry-filter-status').value;
-  executeTrackingViewRenderer(facultyAndResidentsRoster.filter(p => {
-    return (p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)) && (rf === 'all' || p.role === rf) && (sf === 'all' || (sf === 'present' ? p.signed : !p.signed));
-  }));
+  executeTrackingViewRenderer(facultyAndResidentsRoster);
 }
 
 function exportCSV() {
