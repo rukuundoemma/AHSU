@@ -6,111 +6,109 @@
 <meta name="theme-color" content="#1B4F8A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>AHSU Attendance System</title>
+<title>AHSU Attendance System - Professional Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root {
   --blue:#1B4F8A; --blue-d:#0F3460; --blue-l:#2D6FBB; --blue-pale:#EBF2FB; --blue-border:#C2D9F0;
   --green:#2E7D45; --green-pale:#E8F5EC; --green-border:#A3D5B0;
+  --purple:#6B21A8; --purple-pale:#F3E8FF; --purple-border:#D8B4FE;
   --red:#C0392B; --red-pale:#FDECEA; --red-border:#F0B8B3;
   --amber:#B7650A; --amber-pale:#FEF3E2; --amber-border:#F5C96A;
   --gray-50:#F7F8FA; --gray-100:#EEF0F3; --gray-200:#DDE0E6;
   --gray-400:#9BA3AF; --gray-600:#5A6270; --gray-900:#141820;
+  --card-bg:#ffffff; --text-color:#141820; --border-color:#DDE0E6;
   --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
   --r:10px; --r-sm:6px;
   --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.05);
 }
+
+[data-theme="dark"] {
+  --gray-50:#0B0E14; --gray-100:#161B26; --gray-200:#2D3545;
+  --gray-400:#6B7280; --gray-600:#9CA3AF; --gray-900:#F3F4F6;
+  --card-bg:#111622; --text-color:#E5E7EB; --border-color:#242C3D;
+  --blue-pale:#162A45; --blue-border:#1F4475;
+  --green-pale:#0E2A18; --green-border:#1B5E20;
+  --purple-pale:#2E1065; --purple-border:#581C87;
+  --red-pale:#2C1311; --red-border:#7F1D1D;
+  --amber-pale:#2A1E0A; --amber-border:#78350F;
+  --shadow:0 4px 20px rgba(0,0,0,.3);
+}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);font-size:15px;line-height:1.6;min-height:100vh;}
+body{font-family:var(--font);background:var(--gray-50);color:var(--text-color);font-size:15px;line-height:1.6;min-height:100vh;transition:background .2s, color .2s;}
 
 .pg{display:none;} .pg.active{display:block;}
-.topbar{background:var(--blue);color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.topbar{background:var(--blue);color:#fff;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15);}
 .tb-brand{display:flex;align-items:center;gap:10px;}
 .tb-logo{width:34px;height:34px;background:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--blue);letter-spacing:-.5px;}
 .tb-title{font-size:15px;font-weight:600;}
 .tb-sub{font-size:11px;opacity:.65;}
 
-.wrap{max-width:880px;margin:0 auto;padding:28px 20px 80px;}
-.tabs{display:flex;border-bottom:1px solid var(--gray-200);margin-bottom:24px;}
-.tab{padding:10px 20px;font-size:14px;font-family:var(--font);font-weight:500;color:var(--gray-400);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:color .15s,border-color .15s;}
+.wrap{max-width:960px;margin:0 auto;padding:28px 20px 80px;}
+.tabs{display:flex;border-bottom:1px solid var(--border-color);margin-bottom:24px;overflow-x:auto;}
+.tab{padding:10px 20px;font-size:14px;font-family:var(--font);font-weight:500;color:var(--gray-400);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;}
 .tab:hover{color:var(--gray-600);}
 .tab.on{color:var(--blue);border-bottom-color:var(--blue);}
 
-.card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow);}
+.card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--r);padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow);transition:background .2s,border-color .2s;}
 .card-title{font-size:12px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;}
 
 label{font-size:13px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:5px;margin-top:12px;}
 label:first-child{margin-top:0;}
-input[type=text],input[type=date],input[type=time],input[type=password],input[type=email],input[type=url],select,textarea{
-  width:100%;padding:9px 12px;border:1px solid var(--gray-200);border-radius:var(--r-sm);
-  font-size:14px;font-family:var(--font);background:#fff;color:var(--gray-900);
+input[type=text],input[type=date],input[type=time],input[type=password],input[type=email],input[type=url],input[type=number],select,textarea{
+  width:100%;padding:9px 12px;border:1px solid var(--border-color);border-radius:var(--r-sm);
+  font-size:14px;font-family:var(--font);background:var(--card-bg);color:var(--text-color);
   transition:border-color .15s,box-shadow .15s;outline:none;}
 input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 0 0 3px rgba(45,111,187,.12);}
-textarea{resize:vertical;min-height:70px;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
 
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r-sm);font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;border:1px solid transparent;transition:background .15s,transform .1s;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r-sm);font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;border:1px solid transparent;transition:all .15s;}
 .btn:active{transform:scale(.98);}
 .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
 .btn-primary:hover{background:var(--blue-l);}
-.btn-green{background:var(--green);color:#fff;border-color:var(--green);}
-.btn-green:hover{background:#246038;}
-.btn-outline{background:#fff;color:var(--gray-900);border-color:var(--gray-200);}
-.btn-outline:hover{background:var(--gray-50);border-color:var(--gray-400);}
-.btn-danger{background:#fff;color:var(--red);border-color:var(--red-border);}
+.btn-outline{background:transparent;color:var(--text-color);border-color:var(--border-color);}
+.btn-outline:hover{background:var(--gray-100);border-color:var(--gray-400);}
+.btn-danger{background:transparent;color:var(--red);border-color:var(--red-border);}
 .btn-danger:hover{background:var(--red-pale);}
 .btn-sm{padding:5px 12px;font-size:13px;}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
 
 .badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:500;}
 .b-signed{background:var(--green-pale);color:var(--green);}
-.b-pending{background:var(--amber-pale);color:var(--amber);}
+.b-faculty{background:var(--purple-pale);color:var(--purple);border:1px solid var(--purple-border);}
 .b-absent{background:var(--red-pale);color:var(--red);}
 
-.srow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--gray-100);border-radius:var(--r-sm);margin-bottom:6px;background:var(--gray-50);}
+.srow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border-color);border-radius:var(--r-sm);margin-bottom:6px;background:var(--gray-50);}
 .av{width:34px;height:34px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
 .sname{font-size:14px;font-weight:500;}
 .smeta{font-size:12px;color:var(--gray-400);}
 
 .sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
-.sc{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;box-shadow:var(--shadow);}
+.sc{background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--r);padding:14px;text-align:center;box-shadow:var(--shadow);}
 .sn{font-size:26px;font-weight:600;} .sl{font-size:12px;color:var(--gray-400);margin-top:2px;}
 
-.msg{padding:10px 14px;border-radius:var(--r-sm);font-size:13px;margin:10px 0;line-height:1.5;}
-.msg-err{background:var(--red-pale);color:var(--red);border:1px solid var(--red-border);}
-.msg-ok{background:var(--green-pale);color:var(--green);border:1px solid var(--green-border);}
-.msg-info{background:var(--blue-pale);color:var(--blue);border:1px solid var(--blue-border);}
-.msg-warn{background:var(--amber-pale);color:var(--amber);border:1px solid var(--amber-border);}
-
-.code-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--gray-600);word-break:break-all;margin:8px 0;}
-
-.wizard-step{border-left:3px solid var(--gray-200);padding:0 0 20px 20px;margin-left:10px;position:relative;}
-.wizard-step.done{border-left-color:var(--green);}
-.wizard-step.active{border-left-color:var(--blue);}
-.step-dot{position:absolute;left:-11px;top:0;width:20px;height:20px;border-radius:50%;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gray-400);}
-.wizard-step.done .step-dot{background:var(--green);color:#fff;}
-.wizard-step.active .step-dot{background:var(--blue);color:#fff;}
-.step-title{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--gray-900);}
-.step-desc{font-size:13px;color:var(--gray-600);margin-bottom:10px;line-height:1.6;}
-
-#p-canvas{display:block;width:100%;height:140px;border:1.5px dashed var(--gray-200);border-radius:var(--r-sm);background:#fff;cursor:crosshair;touch-action:none;transition:border-color .15s;}
-#p-canvas:hover{border-color:var(--blue-l);}
-.sig-hint{text-align:center;font-size:12px;color:var(--gray-400);margin-top:4px;}
-
-.wa-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:12px;font-size:13px;font-family:var(--mono);color:var(--gray-600);white-space:pre-wrap;line-height:1.6;margin:8px 0;}
+.code-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--gray-600);word-break:break-all;margin:8px 0;}
+.wa-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:12px;font-size:13px;font-family:var(--mono);color:var(--gray-600);white-space:pre-wrap;line-height:1.6;margin:8px 0;}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;}
 .hidden{display:none!important;}
 
-.embed-panel{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:20px;margin-bottom:20px;}
+.timer-container { display: flex; align-items: center; justify-content: space-between; background: var(--gray-100); padding: 12px 18px; border-radius: var(--r-sm); border: 1px dashed var(--blue-border); margin-top: 10px; }
+.timer-clock { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--blue); }
+.qr-modal-wrapper { display: grid; grid-template-columns: 200px 1fr; gap: 20px; align-items: center; }
+#qrcode { background: #fff; padding: 10px; border-radius: 6px; display: inline-block; border: 1px solid var(--gray-200); width: 200px; height: 200px; }
+.toggle-control { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 13px; font-weight: 500; }
+.doc-box { background: var(--gray-100); border: 1px dashed var(--border-color); padding: 16px; border-radius: var(--r-sm); margin-top: 12px; font-size: 13px; }
 
-@media(max-width:600px){
-  .g2,.g3{grid-template-columns:1fr;}
+@media(max-width:768px){
+  .g2,.g3,.qr-modal-wrapper{grid-template-columns:1fr;}
   .sg{grid-template-columns:1fr 1fr;}
   .wrap{padding:14px 14px 60px;}
   .topbar{padding:0 14px;}
   .card{padding:14px 16px;}
-  .tab{padding:10px 10px;font-size:13px;}
+  #qrcode { margin: 0 auto; }
 }
 </style>
 </head>
@@ -120,67 +118,585 @@ textarea{resize:vertical;min-height:70px;}
   <div class="topbar">
     <div class="tb-brand">
       <div class="tb-logo">AHSU</div>
-      <div><div class="tb-title">Attendance System</div><div class="tb-sub">Admin Workspace</div></div>
+      <div><div class="tb-title">Attendance System</div><div class="tb-sub">Admin Engine</div></div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <span id="save-indicator" style="display:none;font-size:11px;color:rgba(255,255,255,.55);"></span>
-      <button class="btn btn-sm" onclick="clearSession()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.5);font-size:12px;">🗑 Clear</button>
+    
+    <div style="display:flex; gap:12px; align-items:center;">
+      <label class="toggle-control" style="color:#fff; margin:0;">
+        <input type="checkbox" id="cfg-audio-chime" checked style="width:auto; cursor:pointer;"> 🔔 Chime
+      </label>
+      <button class="btn btn-sm" onclick="toggleThemeSystem()" style="background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3);" id="theme-btn">🌙 Dark Mode</button>
+      <button class="btn btn-sm" onclick="clearSession()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:12px;">🗑 Clear</button>
     </div>
   </div>
 
   <div class="wrap">
-    <div class="tabs" style="position:relative;">
-      <button class="tab on" id="t-btn-setup" onclick="adminTab('setup')">1 · Setup Workspace</button>
-      <button class="tab" id="t-btn-links" onclick="adminTab('links')">2 · Dispatch Gateways</button>
-      <button class="tab" id="t-btn-track" onclick="adminTab('track')">3 · Physical Sign-In Log</button>
-      <button class="tab" id="t-btn-history" onclick="adminTab('history')">4 · History</button>
-      
-      <button onclick="toggleSheetsPanel()" style="margin-left:auto;padding:6px 14px;background:var(--blue-pale);color:var(--blue);border:1px solid var(--blue-border);font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;transition:all .15s;" id="sheets-toggle-btn">
-        ⚙ Connect Google Sheets
-      </button>
-    </div>
-
-    <div id="embedded-sheets-panel" class="hidden embed-panel">
-      <div style="display:flex;justify-content:between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--gray-200);padding-bottom:10px;">
-        <h3 style="font-size:15px;color:var(--blue);font-weight:600;">Google Sheets Pipeline Configuration</h3>
-        <button onclick="toggleSheetsPanel()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;font-weight:600;margin-left:auto;">[ Hide Panel ]</button>
-      </div>
-      <div class="msg msg-info" style="margin-bottom:16px;">
-        <strong>Cloud Automation Pipeline:</strong> This configuration binds the dynamic dashboard records directly into your cloud repository. Follow the 4 setup milestones below.
-      </div>
-      <div class="card" style="box-shadow:none;margin-bottom:0;">
-        <div class="wizard-step active">
-          <div class="step-dot">1</div>
-          <div class="step-title">Instance Initiation</div>
-          <div class="step-desc">Instantiate a clean spreadsheet worksheet at <a href="https://sheets.new" target="_blank" style="color:var(--blue);text-decoration:underline;">sheets.new</a>. Title the log document: <code>AHSU Live Engine</code>.</div>
-        </div>
-        <div class="wizard-step active">
-          <div class="step-dot">2</div>
-          <div class="step-title">Inject Cloud Macro Script</div>
-          <div class="step-desc">Open <strong>Extensions → Apps Script</strong>. Clear all stub logic, replace with your webhook microservice macro code execution stack, and click Save.</div>
-        </div>
-        <div class="wizard-step active">
-          <div class="step-dot">3</div>
-          <div class="step-title">Deploy Automation Endpoint</div>
-          <div class="step-desc">Click <strong>Deploy → New deployment</strong>. Select <strong>Web app</strong> template configuration. Execute role as <strong>"Me"</strong>, and grant authorization criteria privileges to <strong>"Anyone"</strong>. Copy production microservice route URL.</div>
-        </div>
-        <div class="wizard-step active" style="padding-bottom:0;border-left-color:transparent;">
-          <div class="step-dot">4</div>
-          <div class="step-title">Establish Endpoint Pipeline Handshake</div>
-          <div class="step-desc">Paste the copied deployment string hash down below to successfully instantiate the data stream pipeline.</div>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <input type="url" id="sheets-url" placeholder="https://script.google.com/macros/s/..." style="font-family:var(--mono);font-size:12px;">
-            <button class="btn btn-primary" onclick="testConnection()">Bind Connection &amp; Authenticate</button>
-          </div>
-          <div id="conn-result" style="margin-top:8px;"></div>
-        </div>
-      </div>
+    <div class="tabs">
+      <button class="tab on"  onclick="adminTab('setup')">1 · Setup</button>
+      <button class="tab"     onclick="adminTab('links')">2 · Sharing Gateways</button>
+      <button class="tab"     onclick="adminTab('track')">3 · Tracking &amp; Analytics</button>
+      <button class="tab"     onclick="adminTab('history')">4 · Archives</button>
+      <button class="tab"     onclick="adminTab('connect')" id="sheets-gear-btn">⚙ Cloud Sheets Connect</button>
     </div>
 
     <div id="at-setup">
-      <div class="card" style="border-left: 4px solid var(--blue);">
-        <div class="card-title" style="color: var(--blue); font-size: 13px; font-weight: 700;">Academic Session Parameters</div>
+      <div class="card">
+        <div class="card-title">Session Metadata Parameters</div>
         <div class="g2">
+          <div><label>Course Name</label><input type="text" id="a-course" value="Introduction to Public Health" oninput="updateLinks()"></div>
+          <div><label>Course Code</label><input type="text" id="a-code" value="IPH 101" oninput="updateLinks()"></div>
+        </div>
+        <div class="g3">
+          <div><label>Date</label><input type="date" id="a-date" oninput="updateLinks()"></div>
+          <div><label>Time</label><input type="time" id="a-time" value="09:00" oninput="updateLinks()"></div>
+          <div><label>Expected Residents Pool</label><input type="number" id="a-expected" value="25" min="1" oninput="updateTrack()"></div>
+        </div>
+        <div class="g2">
+          <div><label>Presenter / Lecturer</label><input type="text" id="a-lec" value="Dr. Uwimana" oninput="updateLinks()"></div>
+          <div><label>Session Facilitator</label><input type="text" id="a-fac" value="Prof. Kamali" oninput="updateLinks()"></div>
+        </div>
+        
+        <label>Session Sign-In Passkey</label>
+        <div style="display:flex;gap:8px;margin-top:5px;">
+          <input type="text" id="a-pass" placeholder="e.g. IPH2024A" style="flex:1;font-family:var(--mono);" oninput="updateLinks()">
+          <button class="btn btn-outline" onclick="genPass()">Generate Token</button>
+        </div>
+
+        <label style="margin-top:16px;">Access Gate Deadline Timer</label>
+        <div class="timer-container">
+          <div class="timer-clock" id="timer-display">30:00</div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-outline btn-sm" onclick="extendTimerSystem(5)">+5 Mins</button>
+            <button class="btn btn-outline btn-sm" onclick="extendTimerSystem(10)">+10 Mins</button>
+            <button class="btn btn-primary btn-sm" onclick="togglePauseTimerSystem()" id="timer-pause-btn">Pause</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Enrollment Roster Input Configuration</div>
+        <div class="g3">
+          <div><label>Full Name</label><input type="text" id="s-name" placeholder="Name entry"></div>
+          <div><label>Identification Code / Badge</label><input type="text" id="s-id" placeholder="AHSU2026001"></div>
           <div>
-            <label>Course Name / Activity Title</label>
-            <input type="text" id="a-course" value="Clinical Case Presentation
+            <label>Roster Designation Role</label>
+            <select id="s-role">
+              <option value="Resident">Resident</option>
+              <option value="Faculty">Faculty Member</option>
+            </select>
+          </div>
+        </div>
+        <div class="btns">
+          <button class="btn btn-primary" onclick="addPersonRecord()">+ Commit Member</button>
+          <button class="btn btn-outline" onclick="loadSample()">Load Sample Mixed Cohort</button>
+        </div>
+        <div id="stu-list" style="margin-top:14px;"></div>
+      </div>
+      
+      <div class="btns">
+        <button class="btn btn-primary" onclick="adminTab('links')">Proceed to Sharing Channels →</button>
+      </div>
+    </div>
+
+    <div id="at-links" class="hidden">
+      <div class="card">
+        <div class="card-title">Generative Digital Gateways</div>
+        <div class="qr-modal-wrapper">
+          <div id="qrcode"></div>
+          <div>
+            <h4 style="margin-bottom:6px; font-size:16px;">Live Visual Entry Portal (QR)</h4>
+            <p style="font-size:13px; color:var(--gray-600); margin-bottom:12px;">Display this matrix pattern on the board. Both Residents and attending Faculty members can scan to access the dynamic intake interface payload directly.</p>
+            <button class="btn btn-outline btn-sm" onclick="printQRCodeModule()">🖨 Print QR Form Factor</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📎 Manual Web Access Link Vector</div>
+        <div class="code-box" id="session-link">—</div>
+        <div class="btns">
+          <button class="btn btn-primary" onclick="copyLink()">Copy Link Vector</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">WhatsApp Structured Dispatch Payload</div>
+        <div class="wa-box" id="wa-template">Awaiting initialization variables...</div>
+        <div class="btns"><button class="btn btn-outline" onclick="copyWA()">Copy Layout Block</button></div>
+      </div>
+    </div>
+
+    <div id="at-track" class="hidden">
+      <div id="track-conn-bar" class="conn-bar" style="background:var(--blue-pale); border:1px solid var(--blue-border); display:flex; align-items:center; gap:10px; padding:10px; border-radius:6px; margin-bottom:16px;">
+        <span style="font-size:13px;">🔄 Polling Core Link Engine active. Automated synchronization operational loops operational.</span>
+        <button class="btn btn-outline btn-sm" onclick="refreshFromSheets()" style="margin-left:auto;">Force Sync Refresh</button>
+      </div>
+
+      <div class="sg">
+        <div class="sc"><div class="sn" id="st-expected-val">0</div><div class="sl">Expected Residents</div></div>
+        <div class="sc"><div class="sn" style="color:var(--green);" id="st-present">0</div><div class="sl">Residents Present</div></div>
+        <div class="sc"><div class="sn" style="color:var(--purple);" id="st-faculty-count">0</div><div class="sl">Faculty Checked-In</div></div>
+        <div class="sc"><div class="sn" style="color:var(--blue);" id="st-rate">0%</div><div class="sl">Resident Intake Rate</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <span>Live Session Registry Log Stream</span>
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">CSV Data Export</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr auto auto; gap:10px; margin-bottom:16px; margin-top:8px;">
+          <input type="text" id="registry-search" placeholder="Filter active logs by name or designation ID..." oninput="filterRegistryLogs()">
+          <select id="registry-filter-role" onchange="filterRegistryLogs()" style="width:130px;">
+            <option value="all">All Roles</option>
+            <option value="Resident">Residents</option>
+            <option value="Faculty">Faculty Only</option>
+          </select>
+          <select id="registry-filter-status" onchange="filterRegistryLogs()" style="width:130px;">
+            <option value="all">All Statuses</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+          </select>
+        </div>
+
+        <div id="track-stu-list"></div>
+      </div>
+    </div>
+
+    <div id="at-history" class="hidden">
+      <div class="card">
+        <div class="card-title">Persistent Local Engine Snapshots</div>
+        <div id="history-list"></div>
+      </div>
+    </div>
+
+    <div id="at-connect" class="hidden">
+      <div class="card">
+        <div class="card-title">Google Sheets Integration Sync Layer</div>
+        <p style="font-size:13px; margin-bottom:12px;">Paste your deployment script endpoint to map cloud synchronization pipelines:</p>
+        <input type="url" id="sheets-url" placeholder="https://script.google.com/macros/s/.../exec" style="font-family:var(--mono); font-size:12px; margin-bottom:12px;">
+        <div class="btns">
+          <button class="btn btn-primary" onclick="saveSheetsConfigurationLink()">Secure Link Path Mapping</button>
+          <button class="btn btn-outline" onclick="toggleInstructionsBlock()">📋 Script Setup Instructions</button>
+        </div>
+        
+        <div id="instructions-panel" class="doc-box hidden">
+          <h4 style="margin-bottom:6px;">Google Apps Script Integration Instructions</h4>
+          <ol style="margin-left:20px; margin-bottom:12px; display:flex; flex-direction:column; gap:4px;">
+            <li>Create or open a tracking target spreadsheet in Google Drive.</li>
+            <li>Navigate through <strong>Extensions &gt; Apps Script</strong>.</li>
+            <li>Wipe out default empty boilerplate text and insert the system code implementation block below.</li>
+            <li>Click <strong>Deploy &gt; New Deployment</strong>, choose <strong>Web App</strong>, change Access to <strong>"Anyone"</strong>, then copy the generated production string into the form field above.</li>
+          </ol>
+          <button class="btn btn-outline btn-sm" style="margin-bottom:6px;" onclick="copyMacroCodeBlock()">Copy Code to Clipboard</button>
+          <pre id="macro-code" class="code-box" style="white-space:pre-wrap; max-height:220px; overflow-y:auto; background:var(--gray-50);"></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const ChimeAudioContextEngine = {
+  triggerNotification() {
+    if (!document.getElementById('cfg-audio-chime').checked) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc1 = ctx.createOscillator(); const gain1 = ctx.createGain();
+      osc1.type = 'sine'; osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+      gain1.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc1.connect(gain1); gain1.connect(ctx.destination);
+      osc1.start(); osc1.stop(ctx.currentTime + 0.4);
+      
+      setTimeout(() => {
+        const osc2 = ctx.createOscillator(); const gain2 = ctx.createGain();
+        osc2.type = 'sine'; osc2.frequency.setValueAtTime(659.25, ctx.currentTime);
+        gain2.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc2.connect(gain2); gain2.connect(ctx.destination);
+        osc2.start(); osc2.stop(ctx.currentTime + 0.5);
+      }, 120);
+    } catch(e) { console.warn("Audio processing blocked", e); }
+  }
+};
+
+const MacroDeploymentString = `function doPost(e) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var payload = JSON.parse(e.postData.contents);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    if (payload.action === 'pull') {
+      var data = sheet.getDataRange().getValues();
+      var matchingRecords = [];
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0] == payload.sessionKey) {
+          matchingRecords.push({
+            id: data[i][1],
+            name: data[i][2],
+            role: data[i][3] || 'Resident',
+            time: data[i][4]
+          });
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({status: 'success', records: matchingRecords}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch(error) {
+    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}`;
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// DUAL-DESIGNATION BUSINESS SYSTEM CORE APPLICATION LOGIC
+// ═══════════════════════════════════════════════════════════════════
+let DEPT = 'GEN';
+let facultyAndResidentsRoster = [];
+let sheetsURL = localStorage.getItem('ahsu_GEN_sheets_url') || '';
+let timerSecondsDuration = 1800;
+let isTimerRunning = true;
+let timerSystemIntervalReference = null;
+
+function ns(k) { return 'ahsu_' + DEPT + '_' + k; }
+
+function initApplicationFramework() {
+  document.getElementById('a-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('macro-code').textContent = MacroDeploymentString;
+  genPass();
+  loadCachedSystemConfiguration();
+  initializeTimerCountdownLoop();
+  updateLinks();
+  updateTrack();
+  renderHistoryLogs();
+}
+
+function loadCachedSystemConfiguration() {
+  try {
+    const dataString = localStorage.getItem(ns('session_v2'));
+    if (dataString) {
+      const data = JSON.parse(dataString);
+      document.getElementById('a-course').value = data.course || 'Introduction to Public Health';
+      document.getElementById('a-code').value = data.code || 'IPH 101';
+      document.getElementById('a-lec').value = data.lecturer || 'Dr. Uwimana';
+      document.getElementById('a-fac').value = data.facilitator || 'Prof. Kamali';
+      document.getElementById('a-expected').value = data.expectedPool || '25';
+      document.getElementById('a-pass').value = data.password || '';
+      facultyAndResidentsRoster = Array.isArray(data.people) ? data.people : [];
+    }
+  } catch(e) { console.error("Cached restore array verification failure", e); }
+  renderResidentRegistryDOM();
+}
+
+function persistAppStateToLocalSandbox() {
+  const meta = {
+    course: document.getElementById('a-course').value,
+    code: document.getElementById('a-code').value,
+    date: document.getElementById('a-date').value,
+    lecturer: document.getElementById('a-lec').value,
+    facilitator: document.getElementById('a-fac').value,
+    expectedPool: document.getElementById('a-expected').value,
+    password: document.getElementById('a-pass').value,
+    people: facultyAndResidentsRoster
+  };
+  localStorage.setItem(ns('session_v2'), JSON.stringify(meta));
+}
+
+function adminTab(targetPane) {
+  ['setup', 'links', 'track', 'history', 'connect'].forEach(p => {
+    const el = document.getElementById('at-' + p);
+    if(el) el.classList.add('hidden');
+  });
+  const tPane = document.getElementById('at-' + targetPane);
+  if(tPane) tPane.classList.remove('hidden');
+  
+  document.querySelectorAll('.tabs .tab').forEach((t, idx) => {
+    t.classList.remove('on');
+    if((targetPane==='setup' && idx===0) || (targetPane==='links' && idx===1) || (targetPane==='track' && idx===2) || (targetPane==='history' && idx===3) || (targetPane==='connect' && idx===4)) {
+      t.classList.add('on');
+    }
+  });
+  
+  if(targetPane === 'links') { executeQRRefreshMatrix(); }
+}
+
+function toggleThemeSystem() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const targetTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', targetTheme);
+  document.getElementById('theme-btn').textContent = (targetTheme === 'dark') ? '☀️ Light Mode' : '🌙 Dark Mode';
+}
+
+function toggleInstructionsBlock() {
+  document.getElementById('instructions-panel').classList.toggle('hidden');
+}
+
+function copyMacroCodeBlock() {
+  navigator.clipboard.writeText(MacroDeploymentString);
+  showToast("Apps Script codebase cached to clipboard!");
+}
+
+// Timer Systems
+function initializeTimerCountdownLoop() {
+  if (timerSystemIntervalReference) clearInterval(timerSystemIntervalReference);
+  timerSystemIntervalReference = setInterval(() => {
+    if (!isTimerRunning) return;
+    if (timerSecondsDuration <= 0) {
+      clearInterval(timerSystemIntervalReference);
+      document.getElementById('timer-display').textContent = "LOCKED";
+      document.getElementById('timer-display').style.color = "var(--red)";
+      return;
+    }
+    timerSecondsDuration--;
+    const m = Math.floor(timerSecondsDuration / 60).toString().padStart(2, '0');
+    const s = (timerSecondsDuration % 60).toString().padStart(2, '0');
+    document.getElementById('timer-display').textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function extendTimerSystem(mins) {
+  timerSecondsDuration += (mins * 60);
+  showToast(`Window extended +${mins} minutes.`);
+}
+
+function togglePauseTimerSystem() {
+  isTimerRunning = !isTimerRunning;
+  document.getElementById('timer-pause-btn').textContent = isTimerRunning ? "Pause" : "Resume";
+}
+
+function executeQRRefreshMatrix() {
+  const currentLinkVector = document.getElementById('session-link').textContent;
+  const container = document.getElementById('qrcode');
+  if(!container) return;
+  container.innerHTML = "";
+  new QRCode(container, { text: currentLinkVector, width: 180, height: 180, colorDark : "#0F3460", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+}
+
+function printQRCodeModule() {
+  const link = document.getElementById('session-link').textContent;
+  const course = document.getElementById('a-course').value;
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`<html><body><h2>AHSU Sign-In Portal</h2><h3>${course}</h3><div id="qr"></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById("qr"), {text: "${link}", width:300, height:300}); setTimeout(() => { window.print(); }, 600);<\/script></body></html>`);
+  printWindow.document.close();
+}
+
+function genPass() {
+  const pool = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let res = '';
+  for (let i = 0; i < 6; i++) res += pool.charAt(Math.floor(Math.random() * pool.length));
+  document.getElementById('a-pass').value = res;
+  updateLinks();
+}
+
+function updateLinks() {
+  const origin = window.location.origin + window.location.pathname;
+  const rawPayload = `c=${encodeURIComponent(document.getElementById('a-course').value)}&cd=${encodeURIComponent(document.getElementById('a-code').value)}&d=${encodeURIComponent(document.getElementById('a-date').value)}&t=${encodeURIComponent(document.getElementById('a-time').value)}&l=${encodeURIComponent(document.getElementById('a-lec').value)}&f=${encodeURIComponent(document.getElementById('a-fac').value)}&p=${encodeURIComponent(document.getElementById('a-pass').value)}`;
+  const linkOutput = `${origin}?${rawPayload}`;
+  document.getElementById('session-link').textContent = linkOutput;
+  
+  document.getElementById('wa-template').textContent = `*AHSU Academic Session Gate*\n\nCourse: ${document.getElementById('a-course').value} (${document.getElementById('a-code').value})\nLecturer: ${document.getElementById('a-lec').value}\nFacilitator: ${document.getElementById('a-fac').value}\nPasskey: *${document.getElementById('a-pass').value}*\n\n👉 Intake Form Matrix Link:\n${linkOutput}`;
+}
+
+function copyLink() { navigator.clipboard.writeText(document.getElementById('session-link').textContent); showToast('Access link saved!'); }
+function copyWA() { navigator.clipboard.writeText(document.getElementById('wa-template').textContent); showToast('Message block copied!'); }
+
+// Add records
+function addPersonRecord() {
+  const nameInput = document.getElementById('s-name'); const idInput = document.getElementById('s-id'); const roleInput = document.getElementById('s-role');
+  const n = nameInput.value.trim(); const id = idInput.value.trim().toUpperCase(); const r = roleInput.value;
+  if(!n || !id) { alert('Name and Identity codes required.'); return; }
+  if(facultyAndResidentsRoster.some(x => x.id === id)) { alert('Identity value duplication.'); return; }
+  
+  facultyAndResidentsRoster.push({ name: n, id: id, role: r, signed: false, time: null });
+  nameInput.value = ''; idInput.value = '';
+  renderResidentRegistryDOM();
+  updateTrack();
+  persistAppStateToLocalSandbox();
+}
+
+function loadSample() {
+  facultyAndResidentsRoster = [
+    { name: "Dr. Sibomana Jean", id: "AHSUFAC01", role: "Faculty", signed: false, time: null },
+    { name: "Prof. Mukamana Agnes", id: "AHSUFAC02", role: "Faculty", signed: false, time: null },
+    { name: "Mugisha Eric", id: "AHSU2026001", role: "Resident", signed: false, time: null },
+    { name: "Keza Aline", id: "AHSU2026002", role: "Resident", signed: false, time: null }
+  ];
+  renderResidentRegistryDOM();
+  updateTrack();
+  persistAppStateToLocalSandbox();
+  showToast('Standard setup mock cohort initialized.');
+}
+
+function renderResidentRegistryDOM() {
+  let html = '';
+  facultyAndResidentsRoster.forEach((p, idx) => {
+    html += `<div class="srow">` +
+              `<div class="av">${p.role === 'Faculty' ? '🎓' : '👤'}</div>` +
+              `<div style="flex:1;"><div class="sname">${p.name} <span class="smeta">(${p.id}) [${p.role}]</span></div></div>` +
+              `<button class="btn btn-danger btn-sm" onclick="removeRosterItem(${idx})">Drop</button>` +
+            `</div>`;
+  });
+  document.getElementById('stu-list').innerHTML = html || '<p style="color:var(--gray-400); font-size:12px;">No defined structural roster records exist.</p>';
+}
+
+function removeRosterItem(index) {
+  facultyAndResidentsRoster.splice(index, 1);
+  renderResidentRegistryDOM();
+  updateTrack();
+  persistAppStateToLocalSandbox();
+}
+
+// Processing Updates
+function updateTrack() {
+  const resPool = facultyAndResidentsRoster.filter(x => x.role === 'Resident');
+  const presentRes = resPool.filter(x => x.signed).length;
+  const presentFac = facultyAndResidentsRoster.filter(x => x.role === 'Faculty' && x.signed).length;
+  
+  const expectedPool = parseInt(document.getElementById('a-expected').value) || resPool.length || 1;
+  const rate = Math.round((presentRes / expectedPool) * 100);
+
+  document.getElementById('st-expected-val').textContent = expectedPool;
+  document.getElementById('st-present').textContent = presentRes;
+  document.getElementById('st-faculty-count').textContent = presentFac;
+  document.getElementById('st-rate').textContent = `${rate}%`;
+  
+  executeTrackingViewRenderer(facultyAndResidentsRoster);
+}
+
+function executeTrackingViewRenderer(sourceDataset) {
+  let html = '';
+  sourceDataset.forEach(p => {
+    html += `<div class="srow">` +
+              `<div class="av">${p.role === 'Faculty' ? '🎓' : '👤'}</div>` +
+              `<div style="flex:1;">` +
+                `<div class="sname">${p.name} <span class="smeta">(${p.id})</span></div>` +
+                `<div class="smeta">${p.time ? '🕒 Entry Token Logged: ' + p.time : '🔴 Offline: Awaiting Connection Interaction'}</div>` +
+              `</div>` +
+              `<div>${p.signed ? (p.role === 'Faculty' ? '<span class="badge b-faculty">✓ Faculty Check-In</span>' : '<span class="badge b-signed">✓ Present</span>') : '<span class="badge b-absent">Absent</span>'}</div>` +
+            `</div>`;
+  });
+  document.getElementById('track-stu-list').innerHTML = html || '<p style="color:var(--gray-400); text-align:center; padding:12px;">No subset logs matched query parameters.</p>';
+}
+
+function filterRegistryLogs() {
+  const query = document.getElementById('registry-search').value.toLowerCase().trim();
+  const roleFilter = document.getElementById('registry-filter-role').value;
+  const statusFilter = document.getElementById('registry-filter-status').value;
+  
+  const filtered = facultyAndResidentsRoster.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(query) || p.id.toLowerCase().includes(query);
+    const matchesRole = (roleFilter === 'all') || (p.role === roleFilter);
+    let matchesStatus = true;
+    if(statusFilter === 'present') matchesStatus = p.signed;
+    if(statusFilter === 'absent') matchesStatus = !p.signed;
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+  
+  executeTrackingViewRenderer(filtered);
+}
+
+function saveSheetsConfigurationLink() {
+  const link = document.getElementById('sheets-url').value.trim();
+  if(!link) return;
+  localStorage.setItem('ahsu_GEN_sheets_url', link);
+  sheetsURL = link;
+  showToast("Cloud processing routes initialized.");
+}
+
+async function refreshFromSheets() {
+  if(!sheetsURL) return;
+  try {
+    const sessionToken = document.getElementById('a-code').value + '-' + document.getElementById('a-date').value;
+    const res = await fetch(sheetsURL, {
+      method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'pull', sessionKey: sessionToken })
+    });
+    if(!res.ok) throw new Error("Synchronization Exception Context");
+    const parsed = await res.json();
+    
+    if(parsed && parsed.status === 'success' && Array.isArray(parsed.records)) {
+      let structuralMutationOccurred = false;
+      parsed.records.forEach(cloudRow => {
+        let node = facultyAndResidentsRoster.find(x => x.id.toUpperCase() === cloudRow.id.trim().toUpperCase());
+        if(!node) {
+          node = { id: cloudRow.id, name: cloudRow.name, role: cloudRow.role || 'Resident', signed: true, time: cloudRow.time };
+          facultyAndResidentsRoster.push(node);
+          structuralMutationOccurred = true;
+        } else if(!node.signed) {
+          node.signed = true;
+          node.time = cloudRow.time;
+          structuralMutationOccurred = true;
+        }
+      });
+      
+      if(structuralMutationOccurred) {
+        ChimeAudioContextEngine.triggerNotification();
+        persistAppStateToLocalSandbox();
+        updateTrack();
+        renderResidentRegistryDOM();
+        showToast("Session logs updated from cloud layer.");
+      }
+    }
+  } catch(e) { console.warn("Background loop processing safely bypassed."); }
+}
+
+setInterval(refreshFromSheets, 10000);
+
+function exportCSV() {
+  const matrix = [['Index', 'Role Designation', 'Identification Badge', 'Full Name Name', 'Status Metric', 'Timestamp Logged']];
+  facultyAndResidentsRoster.forEach((p, i) => {
+    matrix.push([i + 1, p.role, p.id, p.name, p.signed ? 'Present' : 'Absent', p.time || '—']);
+  });
+  const csvStr = matrix.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csvStr], { type: 'text/csv;charset=utf-8;' }));
+  a.setAttribute("download", `AHSU_Unified_Attendance_${document.getElementById('a-code').value}.csv`);
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function clearSession() {
+  if(!confirm("Purge localized operational workspace context caches?")) return;
+  autoArchiveData();
+  facultyAndResidentsRoster = [];
+  persistAppStateToLocalSandbox();
+  initApplicationFramework();
+  adminTab('setup');
+}
+
+function autoArchiveData() {
+  if(!facultyAndResidentsRoster.length) return;
+  try {
+    const archive = JSON.parse(localStorage.getItem(ns('archive_v2')) || '[]');
+    archive.unshift({
+      course: document.getElementById('a-course').value, code: document.getElementById('a-code').value, date: document.getElementById('a-date').value,
+      people: facultyAndResidentsRoster, archivedAt: new Date().toLocaleString()
+    });
+    localStorage.setItem(ns('archive_v2'), JSON.stringify(archive));
+  } catch(e) { console.error("Archive system error trace cascade", e); }
+}
+
+function renderHistoryLogs() {
+  const archives = JSON.parse(localStorage.getItem(ns('archive_v2')) || '[]');
+  let html = '';
+  archives.forEach(item => {
+    html += `<div class="card" style="padding:12px 16px; font-size:13px;">` +
+              `<strong>${item.course} (${item.code})</strong><br>` +
+              `<span class="smeta">Timeline Context: ${item.archivedAt} | Check-ins: ${item.people.filter(x=>x.signed).length} Active Signature Nodes</span>` +
+            `</div>`;
+  });
+  document.getElementById('history-list').innerHTML = html || '<p style="color:var(--gray-400); font-size:12px;">Persistent archives historical clear.</p>';
+}
+
+document.addEventListener("DOMContentLoaded", initApplicationFramework);
+</script>
+</body>
+</html>
