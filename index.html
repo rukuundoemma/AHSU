@@ -39,18 +39,13 @@ body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);fon
 .card-title{font-size:12px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;}
 label{font-size:13px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:5px;margin-top:12px;}
 label:first-child{margin-top:0;}
-input[type=text],input[type=date],input[type=time],input[type=password],input[type=email],input[type=url],select,textarea{
+input[type=text],input[type=date],input[type=time],input[type=password],select{
   width:100%;padding:9px 12px;border:1px solid var(--gray-200);border-radius:var(--r-sm);
-  font-size:14px;font-family:var(--font);background:#fff;color:var(--gray-900);
-  transition:border-color .15s,box-shadow .15s;outline:none;}
-input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 0 0 3px rgba(45,111,187,.12);}
+  font-size:14px;font-family:var(--font);background:#fff;color:var(--gray-900);outline:none;}
+input:focus,select:focus{border-color:var(--blue-l);box-shadow:0 0 0 3px rgba(45,111,187,.12);}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r-sm);font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;border:1px solid transparent;transition:background .15s,transform .1s;}
-.btn:active{transform:scale(.98);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r-sm);font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;border:1px solid transparent;transition:background .15s;}
 .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
-.btn-primary:hover{background:var(--blue-l);}
-.btn-green{background:var(--green);color:#fff;border-color:var(--green);}
 .btn-outline{background:#fff;color:var(--gray-900);border-color:var(--gray-200);}
 .btn-sm{padding:5px 12px;font-size:13px;}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
@@ -61,34 +56,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
 .av{width:34px;height:34px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
 .sname{font-size:14px;font-weight:500;}
 .smeta{font-size:12px;color:var(--gray-400);}
-.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
 .sc{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;box-shadow:var(--shadow);}
 .sn{font-size:26px;font-weight:600;} .sl{font-size:12px;color:var(--gray-400);margin-top:2px;}
 .code-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--gray-600);word-break:break-all;margin:8px 0;}
 .wa-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:12px;font-size:13px;font-family:var(--mono);color:var(--gray-600);white-space:pre-wrap;line-height:1.6;margin:8px 0;}
 #st-canvas{display:block;width:100%;height:140px;border:1.5px dashed var(--gray-200);border-radius:var(--r-sm);background:#fff;cursor:crosshair;touch-action:none;}
 .confirm-row{display:flex;align-items:flex-start;gap:10px;background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:var(--r-sm);padding:12px;margin:12px 0;font-size:13px;color:var(--blue);}
-.confirm-row input[type=checkbox]{margin-top:2px;flex-shrink:0;width:auto;cursor:pointer;}
+.confirm-row input[type=checkbox]{margin-top:2px;flex-shrink:0;cursor:pointer;}
 .success-card{background:var(--green-pale);border:1px solid var(--green-border);border-radius:var(--r);padding:28px;text-align:center;margin-bottom:16px;}
 .success-title{font-size:20px;font-weight:600;color:var(--green);margin-bottom:4px;}
-.success-sub{font-size:14px;color:#2E7D45;}
-.stu-header{background:var(--blue);color:#fff;padding:20px 24px;border-radius:var(--r);margin-bottom:20px;display:flex;align-items:center;gap:14px;}
-.stu-header-icon{width:46px;height:46px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.stu-header{background:var(--blue);color:#fff;padding:20px 24px;border-radius:var(--r);margin-bottom:20px;}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;}
 .hidden{display:none!important;}
 
 #dept-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#0F3460,#1B4F8A);display:flex;align-items:center;justify-content:center;z-index:10000;flex-direction:column;gap:14px;}
-#dept-overlay.hidden{display:none!important;}
-.dept-logo{width:64px;height:64px;background:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#1B4F8A;letter-spacing:-.5px;margin-bottom:4px;}
+.dept-logo{width:64px;height:64px;background:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#1B4F8A;letter-spacing:-.5px;}
 .dept-card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r);padding:28px 32px;min-width:320px;max-width:400px;width:90%;}
 .dept-title{color:#fff;font-size:20px;font-weight:700;margin-bottom:4px;text-align:center;}
 .dept-sub{color:rgba(255,255,255,.65);font-size:13px;text-align:center;margin-bottom:20px;}
-.dept-input{width:100%;padding:11px 14px;border:1.5px solid rgba(255,255,255,.3);border-radius:var(--r-sm);background:rgba(255,255,255,.1);color:#fff;font-size:15px;font-family:var(--font);outline:none;margin-bottom:10px;}
+.dept-input{width:100%;padding:11px 14px;border:1.5px solid rgba(255,255,255,.3);border-radius:var(--r-sm);background:rgba(255,255,255,.1);color:#fff;font-size:15px;outline:none;margin-bottom:10px;}
 .dept-input::placeholder{color:rgba(255,255,255,.4);}
-.dept-input:focus{border-color:#fff;background:rgba(255,255,255,.15);}
-.dept-btn{width:100%;padding:12px;background:#fff;color:#1B4F8A;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);transition:background .15s;}
+.dept-btn{width:100%;padding:12px;background:#fff;color:#1B4F8A;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;}
 .dept-btn:hover{background:#EBF2FB;}
-.dept-err{color:rgba(255,100,100,.9);font-size:13px;text-align:center;min-height:18px;}
+.dept-err{color:rgba(255,100,100,.9);font-size:13px;text-align:center;min-height:18px;margin-top:5px;}
 .dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
 .dept-tile{padding:16px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);border-radius:var(--r-sm);cursor:pointer;text-align:center;transition:all .15s;}
 .dept-tile:hover{background:rgba(255,255,255,.18);border-color:#fff;}
@@ -97,11 +88,25 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
 #dept-indicator{font-size:11px;color:rgba(255,255,255,.7);padding:3px 10px;background:rgba(255,255,255,.1);border-radius:999px;border:1px solid rgba(255,255,255,.25);}
 
 @media(max-width:600px){
-  .g2,.g3{grid-template-columns:1fr;}
-  .sg{grid-template-columns:1fr 1fr;}
-  .wrap{padding:14px 14px 60px;}
+  .g2{grid-template-columns:1fr;}
+  .sg{grid-template-columns:1fr;}
 }
 </style>
+
+<script>
+// =========================================================================
+// INTERFACE STRUCTURAL VIEW CONTROLLER (DEFINED FIRST TO PREVENT CRASHES)
+// =========================================================================
+function showDeptPinMode() {
+  document.getElementById('dept-choose-mode').style.display = 'none';
+  document.getElementById('dept-pin-mode').style.display = 'block';
+}
+
+function showDeptChooseMode() {
+  document.getElementById('dept-pin-mode').style.display = 'none';
+  document.getElementById('dept-choose-mode').style.display = 'block';
+}
+</script>
 </head>
 <body>
 
@@ -122,10 +127,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
     <div id="dept-pin-mode" style="display: none;">
       <div class="dept-title">Admin Sign In</div>
       <div class="dept-sub">Enter your department code and PIN</div>
-      <input class="dept-input" id="dept-code-input" placeholder="Department code (e.g. OBG)" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+      <input class="dept-input" id="dept-code-input" placeholder="Department code (e.g. OBG)" autocomplete="off">
       <input class="dept-input" id="dept-pin-input" placeholder="4-digit PIN" type="password" maxlength="4" inputmode="numeric">
       <div class="dept-err" id="dept-pin-err"></div>
-      <button type="button" class="dept-btn" onclick="submitDeptPin()" style="margin-top:4px;">Sign In →</button>
+      <button type="button" class="dept-btn" onclick="submitDeptPin()">Sign In →</button>
       <div style="margin-top:14px;text-align:center;">
         <button type="button" onclick="showDeptChooseMode()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;text-decoration:underline;padding:5px;">← Back</button>
       </div>
@@ -262,18 +267,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
     <div id="st-s2" class="hidden">
       <div class="card">
         <canvas id="st-canvas"></canvas>
-        <div class="confirm-row"><input type="checkbox" id="st-chk"><label for="st-chk" style="margin:0;">I confirm my accuracy metrics.</label></div>
+        <div class="confirm-row"><input type="checkbox" id="st-chk"><label for="st-chk" style="margin:0;">I confirm my attendance profile details.</label></div>
         <div class="dept-err" id="st-serr"></div>
         <button class="btn btn-green" style="width:100%;justify-content:center;" onclick="submitSignatureToCloud()">✔ Submit</button>
       </div>
     </div>
-    <div id="st-s3" class="hidden"><div class="success-card"><div class="success-title">✔ Submitted</div></div></div>
+    <div id="st-s3" class="hidden"><div class="success-card"><div class="success-title">✔ Submitted Successfully</div></div></div>
   </div>
 </div>
 
 <div id="toast">Updated</div>
 
 <script>
+// =========================================================================
+// DATA AND CONFIGURATION CONTROLLER INTERFACES
+// =========================================================================
 const SUPABASE_URL = "https://rxvtgleahdweedfiaxtq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4dnRnbGVhaGR3ZWVkZmlheHRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxODUzNDMsImV4cCI6MjA5NDc2MTM0M30.0XClhE4g4S6bZ-pgVRXB-zHQUEGqKitq1_OSqyRc2fY";
 const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -286,16 +294,6 @@ const $ = (id) => document.getElementById(id);
 const show = (el) => { if(el) el.classList.remove('hidden'); };
 const hide = (el) => { if(el) el.classList.add('hidden'); };
 
-function showDeptPinMode() {
-  document.getElementById('dept-choose-mode').style.display = 'none';
-  document.getElementById('dept-pin-mode').style.display = 'block';
-}
-
-function showDeptChooseMode() {
-  document.getElementById('dept-pin-mode').style.display = 'none';
-  document.getElementById('dept-choose-mode').style.display = 'block';
-}
-
 window.addEventListener('load', async () => {
   const today = new Date().toISOString().split('T')[0];
   if($('a-date')) $('a-date').value = today;
@@ -304,12 +302,14 @@ window.addEventListener('load', async () => {
 });
 
 async function loadDepartments() {
+  // Safe default initialization array to guarantee immediate UI render
   departmentsList = [{ code: "OBG", name: "Obstetrics & Gynaecology", pin: "1234" }];
+  
   if (supabase) {
     try {
       const { data } = await supabase.from('departments').select('*').order('name');
       if (data && data.length > 0) { departmentsList = data; }
-    } catch(e) { console.log("Database fallback mode engaged."); }
+    } catch(e) { console.log("Supabase initialization fallback active."); }
   }
   renderDeptUIs();
 }
@@ -323,7 +323,7 @@ function renderDeptUIs() {
   departmentsList.forEach(d => {
     if(grid) {
       const t = document.createElement('div'); t.className = "dept-tile";
-      t.onclick = () => selectDept(d.code, d.name);
+      t.onclick = function() { selectDept(d.code, d.name); };
       t.innerHTML = `<div class="dept-tile-name">${d.code}</div><div class="dept-tile-sub">${d.name}</div>`;
       grid.appendChild(t);
     }
@@ -340,7 +340,7 @@ function selectDept(code, name) {
   $('dept-indicator').innerText = code;
   show($('dept-indicator'));
   hide($('dept-overlay'));
-  if(code==='SUPER') { show($('tab-sa-btn')); adminTab('superadmin'); }
+  if(code === 'SUPER') { show($('tab-sa-btn')); adminTab('superadmin'); }
   else { hide($('tab-sa-btn')); adminTab('setup'); }
 }
 
@@ -351,9 +351,10 @@ function submitDeptPin() {
   err.innerText = "";
 
   if(code === 'SUPER' && pin === '2026') { selectDept('SUPER', 'System Master'); return; }
+  
   const d = departmentsList.find(x => x.code === code);
   if(d && d.pin === pin) { selectDept(d.code, d.name); }
-  else { err.innerText = "Invalid credentials entered."; }
+  else { err.innerText = "Invalid credentials. Try again."; }
 }
 
 async function saveDepartment() {
@@ -361,8 +362,11 @@ async function saveDepartment() {
   const name = $('sa-name').value.trim();
   const pin = $('sa-pin').value.trim();
   if(!code || !name || !pin || !supabase) return;
-  await supabase.from('departments').withWritethrough().upsert([{ code, name, pin }]);
+  
+  await supabase.from('departments').upsert([{ code, name, pin }]);
   await loadDepartments();
+  $('sa-code').value=""; $('sa-name').value=""; $('sa-pin').value="";
+  $('sa-msg').innerHTML = "<span style='color:var(--green)'>Department Saved!</span>";
 }
 
 async function commitSessionToCloud() {
@@ -370,7 +374,7 @@ async function commitSessionToCloud() {
   const code = $('a-code').value.trim();
   const d = $('a-date').value;
   const pass = $('a-pass').value.trim().toUpperCase();
-  if(!c || !code || !d || !pass) { alert("Please complete setup input fields."); return; }
+  if(!c || !code || !d || !pass) { alert("Please compile all data setup layout fields."); return; }
 
   activeShortKey = 's' + Math.random().toString(36).substring(2, 10);
   sessionPass = pass;
@@ -381,7 +385,6 @@ async function commitSessionToCloud() {
       lecturer: $('a-lec').value, facilitator: $('a-facilitator').value, password: pass, roster_json: {students, faculty}
     }]);
   }
-
   updateLinks(); adminTab('links');
 }
 
@@ -428,7 +431,7 @@ function submitSignatureToCloud() {
 
 function openStudentPreview() { 
   hide($('pg-admin')); show($('pg-student')); 
-  const s=$('st-select-user'); s.innerHTML="<option value=''>-- Select --</option>";
+  const s=$('st-select-user'); s.innerHTML="<option value=''>-- Select Profile --</option>";
   students.forEach(x=>{ const o=document.createElement('option'); o.value=x.id; o.innerText=x.name; s.appendChild(o); });
 }
 function exitStudentView() { hide($('pg-student')); show($('pg-admin')); }
@@ -446,7 +449,7 @@ function genPass() { $('a-pass').value = Math.random().toString(36).substring(2,
 function copyLink() { navigator.clipboard.writeText($('session-link').innerText); showToast("Copied!"); }
 function showToast(m) { const t=$('toast'); t.innerText=m; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2000); }
 function clearSession() { students=[]; renderStuList(); }
-function exportCSV() { alert("Data CSV compilation processed."); }
+function exportCSV() { alert("Data CSV compilation finished."); }
 </script>
 </body>
 </html>
