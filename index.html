@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#1B4F8A">
+<title>AHSU Attendance System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --blue:#1B4F8A; --blue-d:#0F3460; --blue-l:#2D6FBB; --blue-pale:#EBF2FB; --blue-border:#C2D9F0;
+  --green:#2E7D45; --green-pale:#E8F5EC; --green-border:#A3D5B0;
+  --red:#C0392B; --red-pale:#FDECEA; --red-border:#F0B8B3;
+  --amber:#B7650A; --amber-pale:#FEF3E2; --amber-border:#F5C96A;
+  --gray-50:#F7F8FA; --gray-100:#EEF0F3; --gray-200:#DDE0E6;
+  --gray-400:#9BA3AF; --gray-600:#5A6270; --gray-900:#141820;
+  --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.05);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);font-size:15px;line-height:1.6;min-height:100vh;}
+
+.pg{display:none;} .pg.active{display:block;}
+.topbar{background:var(--blue);color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.tb-brand{display:flex;align-items:center;gap:10px;}
+.tb-logo{width:34px;height:34px;background:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--blue);letter-spacing:-.5px;}
+.tb-title{font-size:15px;font-weight:600;}
+.tb-sub{font-size:11px;opacity:.65;}
+.wrap{max-width:880px;margin:0 auto;padding:28px 20px 80px;}
+.tabs{display:flex;border-bottom:1px solid var(--gray-200);margin-bottom:24px;}
+.tab{padding:10px 20px;font-size:14px;font-family:var(--font);font-weight:500;color:var(--gray-400);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:color .15s,border-color .15s;}
+.tab:hover{color:var(--gray-600);}
+.tab.on{color:var(--blue);border-bottom-color:var(--blue);}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow);}
+.card-title{font-size:12px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;}
+label{font-size:13px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:5px;margin-top:12px;}
+label:first-child{margin-top:0;}
+input[type=text],input[type=date],input[type=time],input[type=password],input[type=email],input[type=url],select,textarea{
+  width:100%;padding:9px 12px;border:1px solid var(--gray-200);border-radius:var(--r-sm);
+  font-size:14px;font-family:var(--font);background:#fff;color:var(--gray-900);
+  transition:border-color .15s,box-shadow .15s;outline:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 0 0 3px rgba(45,111,187,.12);}
+textarea{resize:vertical;min-height:70px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r-sm);font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;border:1px solid transparent;transition:background .15s,transform .1s;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-primary:hover{background:var(--blue-l);}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green);}
+.btn-green:hover{background:#246038;}
+.btn-outline{background:#fff;color:var(--gray-900);border-color:var(--gray-200);}
+.btn-outline:hover{background:var(--gray-50);border-color:var(--gray-400);}
+.btn-danger{background:#fff;color:var(--red);border-color:var(--red-border);}
+.btn-danger:hover{background:var(--red-pale);}
+.btn-sm{padding:5px 12px;font-size:13px;}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:500;}
+.b-signed{background:var(--green-pale);color:var(--green);}
+.b-pending{background:var(--amber-pale);color:var(--amber);}
+.b-absent{background:var(--red-pale);color:var(--red);}
+.srow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--gray-100);border-radius:var(--r-sm);margin-bottom:6px;background:var(--gray-50);}
+.av{width:34px;height:34px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+.sname{font-size:14px;font-weight:500;}
+.smeta{font-size:12px;color:var(--gray-400);}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.sc{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;box-shadow:var(--shadow);}
+.sn{font-size:26px;font-weight:600;} .sl{font-size:12px;color:var(--gray-400);margin-top:2px;}
+.msg{padding:10px 14px;border-radius:var(--r-sm);font-size:13px;margin:10px 0;line-height:1.5;}
+.msg-err{background:var(--red-pale);color:var(--red);border:1px solid var(--red-border);}
+.msg-ok{background:var(--green-pale);color:var(--green);border:1px solid var(--green-border);}
+.msg-info{background:var(--blue-pale);color:var(--blue);border:1px solid var(--blue-border);}
+.msg-warn{background:var(--amber-pale);color:var(--amber);border:1px solid var(--amber-border);}
+.code-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--gray-600);word-break:break-all;margin:8px 0;}
+.wa-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:12px;font-size:13px;font-family:var(--mono);color:var(--gray-600);white-space:pre-wrap;line-height:1.6;margin:8px 0;}
+#st-canvas{display:block;width:100%;height:140px;border:1.5px dashed var(--gray-200);border-radius:var(--r-sm);background:#fff;cursor:crosshair;touch-action:none;}
+.sig-hint{text-align:center;font-size:12px;color:var(--gray-400);margin-top:4px;}
+.confirm-row{display:flex;align-items:flex-start;gap:10px;background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:var(--r-sm);padding:12px;margin:12px 0;font-size:13px;color:var(--blue);}
+.confirm-row input[type=checkbox]{margin-top:2px;flex-shrink:0;width:auto;cursor:pointer;}
+.success-card{background:var(--green-pale);border:1px solid var(--green-border);border-radius:var(--r);padding:28px;text-align:center;margin-bottom:16px;}
+.success-title{font-size:20px;font-weight:600;color:var(--green);margin-bottom:4px;}
+.success-sub{font-size:14px;color:#2E7D45;}
+.stu-header{background:var(--blue);color:#fff;padding:20px 24px;border-radius:var(--r);margin-bottom:20px;display:flex;align-items:center;gap:14px;}
+.stu-header-icon{width:46px;height:46px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.exp-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--gray-100);}
+.exp-row:last-child{border-bottom:none;padding-bottom:0;}
+.exp-icon{width:40px;height:40px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;font-family:var(--mono);}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;}
+.hidden{display:none!important;}
+
+#dept-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#0F3460,#1B4F8A);display:flex;align-items:center;justify-content:center;z-index:10000;flex-direction:column;gap:14px;}
+#dept-overlay.hidden{display:none!important;}
+.dept-logo{width:64px;height:64px;background:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#1B4F8A;letter-spacing:-.5px;margin-bottom:4px;}
+.dept-card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--r);padding:28px 32px;min-width:320px;max-width:400px;width:90%;}
+.dept-title{color:#fff;font-size:20px;font-weight:700;margin-bottom:4px;text-align:center;}
+.dept-sub{color:rgba(255,255,255,.65);font-size:13px;text-align:center;margin-bottom:20px;}
+.dept-input{width:100%;padding:11px 14px;border:1.5px solid rgba(255,255,255,.3);border-radius:var(--r-sm);background:rgba(255,255,255,.1);color:#fff;font-size:15px;font-family:var(--font);outline:none;margin-bottom:10px;}
+.dept-input::placeholder{color:rgba(255,255,255,.4);}
+.dept-input:focus{border-color:#fff;background:rgba(255,255,255,.15);}
+.dept-btn{width:100%;padding:12px;background:#fff;color:#1B4F8A;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);transition:background .15s;}
+.dept-btn:hover{background:#EBF2FB;}
+.dept-err{color:rgba(255,100,100,.9);font-size:13px;text-align:center;min-height:18px;}
+.dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.dept-tile{padding:16px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);border-radius:var(--r-sm);cursor:pointer;text-align:center;transition:all .15s;}
+.dept-tile:hover{background:rgba(255,255,255,.18);border-color:#fff;}
+.dept-tile-name{color:#fff;font-weight:600;font-size:14px;}
+.dept-tile-sub{color:rgba(255,255,255,.55);font-size:11px;margin-top:3px;}
+#dept-indicator{font-size:11px;color:rgba(255,255,255,.7);padding:3px 10px;background:rgba(255,255,255,.1);border-radius:999px;border:1px solid rgba(255,255,255,.25);}
+
+@media(max-width:600px){
+  .g2,.g3{grid-template-columns:1fr;}
+  .sg{grid-template-columns:1fr 1fr;}
+  .wrap{padding:14px 14px 60px;}
+  .topbar{padding:0 14px;}
+  .card{padding:14px 16px;}
+}
+</style>
+</head>
+<body>
+
+<div id="dept-overlay">
+  <div class="dept-logo">AHSU</div>
+  <div class="dept-card">
+    <div id="dept-choose-mode">
+      <div class="dept-title">Select Department</div>
+      <div class="dept-sub">Choose your department to access your workspace</div>
+      <div class="dept-grid" id="dept-tile-grid"></div>
+      <div class="dept-err" id="dept-err"></div>
+      <div style="margin-top:12px;text-align:center;">
+        <button onclick="showDeptPinMode()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;text-decoration:underline;padding:5px;">Enter code manually</button>
+      </div>
+    </div>
+    <div id="dept-pin-mode" style="display:none;">
+      <div class="dept-title">Admin Sign In</div>
+      <div class="dept-sub">Enter your department code and PIN</div>
+      <input class="dept-input" id="dept-code-input" placeholder="Department code (e.g. OBG)" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+      <input class="dept-input" id="dept-pin-input" placeholder="4-digit PIN" type="password" maxlength="4" inputmode="numeric">
+      <div class="dept-err" id="dept-pin-err"></div>
+      <button class="dept-btn" onclick="submitDeptPin()" style="margin-top:4px;">Sign In →</button>
+      <div style="margin-top:14px;text-align:center;">
+        <button onclick="showDeptChooseMode()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;text-decoration:underline;padding:5px;">← Back</button>
+      </div>
+    </div>
+  </div>
+  <div style="color:rgba(255,255,255,.35);font-size:11px;">Africa Health Sciences University</div>
+</div>
+
+<div id="pg-admin" class="pg active">
+  <div class="topbar">
+    <div class="tb-brand">
+      <div class="tb-logo">AHSU</div>
+      <div><div class="tb-title">Attendance System</div><div class="tb-sub">Admin Dashboard</div></div>
+      <span id="dept-indicator" class="hidden">—</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-sm" onclick="clearSession()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);font-size:12px;">🗑 Clear Session</button>
+      <button class="btn btn-sm" onclick="openStudentPreview()" style="background:#fff;color:var(--blue);border:1px solid #fff;font-weight:600;">👁 Preview Sign-In</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="tabs">
+      <button class="tab on"  id="btn-at-setup" onclick="adminTab('setup')">1 · Setup</button>
+      <button class="tab"     id="btn-at-links" onclick="adminTab('links')">2 · Send Link</button>
+      <button class="tab"     id="btn-at-track" onclick="adminTab('track')">3 · Track &amp; Export</button>
+      <button class="tab"     id="btn-at-history" onclick="adminTab('history')">4 · Session History</button>
+      <button id="tab-sa-btn" class="tab hidden" onclick="adminTab('superadmin')">👑 Departments</button>
+    </div>
+
+    <div id="at-setup">
+      <div class="card">
+        <div class="card-title">Session Details</div>
+        <div class="g2">
+          <div><label>Course name</label><input type="text" id="a-course" value="Introduction to Public Health" oninput="updateLinks()"></div>
+          <div><label>Course code</label><input type="text" id="a-code" value="IPH 101" oninput="updateLinks()"></div>
+        </div>
+        <div class="g2">
+          <div><label>Date</label><input type="date" id="a-date" oninput="updateLinks()"></div>
+          <div><label>Time</label><input type="time" id="a-time" value="09:00" oninput="updateLinks()"></div>
+        </div>
+        <div class="g2">
+          <div><label>Presenter / Lecturer</label><input type="text" id="a-lec" value="Dr. Uwimana" oninput="updateLinks()"></div>
+          <div><label>Facilitator</label><input type="text" id="a-facilitator" placeholder="e.g. Dr. Kagabo" oninput="updateLinks()"></div>
+        </div>
+        <label>Session password</label>
+        <div style="display:flex;gap:8px;margin-top:5px;">
+          <input type="text" id="a-pass" placeholder="e.g. IPH2026" style="flex:1;font-family:var(--mono);" oninput="updateLinks()">
+          <button class="btn btn-outline" onclick="genPass()">Generate</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Pre-load Students</div>
+        <div class="g2">
+          <div><label>Full name</label><input type="text" id="s-name" placeholder="Student full name"></div>
+          <div><label>Student ID</label><input type="text" id="s-id" placeholder="AHSU2026001"></div>
+        </div>
+        <div class="g2">
+          <div><label>Program</label><input type="text" id="s-prog" placeholder="e.g. Obs &amp; Gynaecology Yr2"></div>
+          <div><label>Email / WhatsApp</label><input type="text" id="s-contact" placeholder="student@ahsu.ac.rw"></div>
+        </div>
+        <div class="btns">
+          <button class="btn btn-primary" onclick="addStu()">+ Add Student</button>
+          <button class="btn btn-outline" onclick="loadSample()">Load Sample Class</button>
+        </div>
+        <div id="stu-list" style="margin-top:14px;"></div>
+      </div>
+
+      <div class="card" style="border-left:4px solid var(--amber);">
+        <div class="card-title" style="color:#B7650A;">Faculty Members</div>
+        <div class="g2">
+          <div><label>Full name</label><input type="text" id="f-name" placeholder="Prof. Kamanzi"></div>
+          <div><label>Staff ID</label><input type="text" id="f-id" placeholder="FAC001"></div>
+        </div>
+        <div class="g2">
+          <div><label>Department / Title</label><input type="text" id="f-dept" placeholder="e.g. Head of Medicine"></div>
+          <div><label>Email</label><input type="text" id="f-email" placeholder="faculty@ahsu.ac.rw"></div>
+        </div>
+        <div class="btns">
+          <button class="btn btn-outline" style="border-color:#B7650A;color:#B7650A;" onclick="addFaculty()">+ Add Faculty Member</button>
+        </div>
+        <div id="faculty-list" style="margin-top:14px;"></div>
+      </div>
+
+      <div class="btns">
+        <button class="btn btn-primary" onclick="commitSessionToCloud()">Next: Generate &amp; Send Link →</button>
+      </div>
+    </div>
+
+    <div id="at-superadmin" class="hidden">
+      <div class="card" style="border-left:4px solid var(--amber);">
+        <div class="card-title" style="color:var(--amber);">Create / Update Department</div>
+        <div class="g2">
+          <div><label>Department Code</label><input type="text" id="sa-code" placeholder="e.g. OBG" style="text-transform:uppercase;font-family:var(--mono);"></div>
+          <div><label>Display Name</label><input type="text" id="sa-name" placeholder="e.g. Obstetrics &amp; Gynaecology"></div>
+        </div>
+        <div class="g2">
+          <div><label>Admin PIN (4 digits)</label><input type="text" id="sa-pin" placeholder="e.g. 5678" maxlength="4" inputmode="numeric"></div>
+        </div>
+        <div class="btns"><button class="btn btn-primary" onclick="saveDepartment()">💾 Save Department</button></div>
+        <div id="sa-msg" style="margin-top:8px;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Active Departments Registry</div>
+        <div id="sa-dept-list"></div>
+      </div>
+    </div>
+
+    <div id="at-links" class="hidden">
+      <div class="card">
+        <div class="card-title">📎 Ingestion Portal Link</div>
+        <div class="code-box" id="session-link">—</div>
+        <div class="btns">
+          <button class="btn btn-primary" onclick="copyLink()">Copy Link</button>
+          <button class="btn btn-outline" onclick="openStudentPreview()">Preview as Student</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">WhatsApp Template Message</div>
+        <div class="wa-box" id="wa-template">—</div>
+        <div class="btns"><button class="btn btn-outline" onclick="copyWA()">Copy Message</button></div>
+      </div>
+      <div class="btns"><button class="btn btn-primary" onclick="adminTab('track')">Go to Live Tracking →</button></div>
+    </div>
+
+    <div id="at-track" class="hidden">
+      <div class="conn-bar" style="background:var(--green-pale);border:1px solid var(--green-border); color:var(--green); margin-bottom:16px; padding:10px; border-radius:6px; display:flex; justify-content:between; align-items:center;">
+        <span>🟢 Connected to Cloud Infrastructure — Real-time event logging active</span>
+        <button class="btn btn-outline btn-sm" onclick="fetchLiveSignins()" style="border-color:var(--green);color:var(--green);">↻ Sync Now</button>
+      </div>
+      <div class="sg">
+        <div class="sc"><div class="sn" id="t-total" style="color:var(--blue);">0</div><div class="sl">Enrolled</div></div>
+        <div class="sc"><div class="sn" id="t-signed" style="color:var(--green);">0</div><div class="sl">Signed</div></div>
+        <div class="sc"><div class="sn" id="t-absent" style="color:var(--red);">0</div><div class="sl">Absent</div></div>
+        <div class="sc"><div class="sn" id="t-pct" style="color:var(--amber);">0%</div><div class="sl">Attendance</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Live Student Register</div>
+        <div id="live-list"></div>
+      </div>
+      <div class="card" style="border-left:4px solid #B7650A;">
+        <div class="card-title" style="color:#B7650A;">Faculty Log Registry</div>
+        <div id="live-faculty-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Data Exports</div>
+        <div class="g2">
+          <button class="btn btn-outline" onclick="exportPDF()">🖨 Generate Report PDF</button>
+          <button class="btn btn-outline" onclick="exportCSV()">📊 Download Spreadsheet CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="at-history" class="hidden">
+      <div class="card">
+        <div class="card-title">Historical Logged Sessions</div>
+        <div id="history-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pg-student" class="pg">
+  <div class="topbar" style="background:var(--blue-d);">
+    <div class="tb-brand">
+      <div class="tb-logo" style="color:var(--blue-d)">AHSU</div>
+      <div><div class="tb-title" id="st-hdr-title">AHSU Ingestion Portal</div><div class="tb-sub">Attendee Identity Access Gateway</div></div>
+    </div>
+    <button class="btn btn-sm" onclick="exitStudentView()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">← Back Dashboard</button>
+  </div>
+
+  <div class="wrap" style="max-width:550px;padding-top:20px;">
+    <div id="st-s1">
+      <div class="stu-header">
+        <div class="stu-header-icon">📋</div>
+        <div>
+          <div style="font-size:16px;font-weight:600;" id="st-card-course">—</div>
+          <div style="font-size:12px;opacity:.8;" id="st-card-meta">—</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Verify Identity</div>
+        <label>Role</label>
+        <select id="st-role" onchange="toggleRoleFields()">
+          <option value="student">Student / Resident Attendee</option>
+          <option value="faculty">Faculty Member / Instructor</option>
+        </select>
+        
+        <div id="row-st-search">
+          <label>Select Your Profile</label>
+          <select id="st-select-user"></select>
+        </div>
+
+        <div style="background:var(--gray-50);padding:12px;border:1px solid var(--gray-200);border-radius:var(--r-sm);margin:12px 0;">
+          <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:6px;">Or Add Individual Details Manually:</div>
+          <label>Full Name</label><input type="text" id="st-custom-name">
+          <label id="lbl-st-custom-id">ID Number</label><input type="text" id="st-custom-id">
+          <div id="fields-custom-student">
+            <label>Program / Year</label><input type="text" id="st-custom-prog">
+            <label>Contact Number</label><input type="text" id="st-custom-contact">
+          </div>
+          <div id="fields-custom-faculty" class="hidden">
+            <label>Department</label><input type="text" id="st-custom-dept">
+            <label>Email Address</label><input type="text" id="st-custom-email">
+          </div>
+        </div>
+
+        <div id="row-st-pass">
+          <label>Session Password</label>
+          <input type="password" id="st-pass" placeholder="Enter session token">
+        </div>
+        <div class="dept-err" id="st-validation-msg" style="text-align:left;margin-top:8px;"></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:12px;justify-content:center;" onclick="goToSignatureCanvas()">Next: Canvas Sign →</button>
+      </div>
+    </div>
+
+    <div id="st-s2" class="hidden">
+      <div class="card">
+        <div class="card-title">Draw E-Signature</div>
+        <p style="font-size:13px;margin-bottom:10px;">Hello <strong id="st-hello-name">—</strong>, please sign inside the canvas box grid lines below:</p>
+        <canvas id="st-canvas"></canvas>
+        <div class="btns" style="margin-top:10px;"><button class="btn btn-outline btn-sm" onclick="clearCanvas()">Clear Pad</button></div>
+        <div class="confirm-row">
+          <input type="checkbox" id="st-chk">
+          <label for="st-chk" style="margin:0;font-size:12px;color:var(--blue);">I confirm that I am present in this lecture session and my submission entry data metrics are accurate.</label>
+        </div>
+        <div class="dept-err" id="st-serr" style="text-align:left;margin-bottom:8px;"></div>
+        <button class="btn btn-green" style="width:100%;justify-content:center;" onclick="submitSignatureToCloud()">✔ Submit Registration Logs</button>
+      </div>
+    </div>
+
+    <div id="st-s3" class="hidden">
+      <div class="success-card">
+        <div class="success-title">✔ Ingestion Log Transmitted</div>
+        <p class="success-sub">Your data profile has successfully anchored inside cluster arrays.</p>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="resetIngestionForm()">Sign In Someone Else</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast">State Updated</div>
+
+<script>
+// =========================================================================
+// INTERFACE STRUCTURAL CONTROLLER LOGIC
+// =========================================================================
+const SUPABASE_URL = "https://rxvtgleahdweedfiaxtq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4dnRnbGVhaGR3ZWVkZmlheHRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxODUzNDMsImV4cCI6MjA5NDc2MTM0M30.0XClhE4g4S6bZ-pgVRXB-zHQUEGqKitq1_OSqyRc2fY";
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+let DEPT = "";
+let DEPT_NAME = "";
+let activeShortKey = "";
+let sessionPass = "";
+let students = [];
+let faculty = [];
+let departmentsList = [];
+let sCanvas, sCtx, sDrawing = false;
+let curSid = null, curIsCustom = false;
+
+const $ = (id) => document.getElementById(id);
+const show = (el) => { if(el) el.classList.remove('hidden'); };
+const hide = (el) => { if(el) el.classList.add('hidden'); };
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const today = new Date().toISOString().split('T')[0];
+  if($('a-date')) $('a-date').value = today;
+  initCanvas();
+  await loadDepartments();
+  evaluateURL();
+});
+
+// DISPLAY ROUTING FIXES
+function showDeptPinMode() {
+  $('dept-choose-mode').style.display = 'none';
+  $('dept-pin-mode').style.display = 'block';
+}
+function showDeptChooseMode() {
+  $('dept-pin-mode').style.display = 'none';
+  $('dept-choose-mode').style.display = 'block';
+}
+
+async function loadDepartments() {
+  if (!supabase) return;
+  const { data } = await supabase.from('departments').select('*').order('name');
+  departmentsList = data || [];
+  
+  // Inject safety fallback models if user project starts on a completely clean server database
+  if (departmentsList.length === 0) {
+    departmentsList = [{ code: "OBG", name: "Obstetrics & Gynaecology", pin: "1234" }];
+  }
+  renderDeptUIs();
+}
+
+function renderDeptUIs() {
+  const grid = $('dept-tile-grid');
+  const saList = $('sa-dept-list');
+  if(grid) grid.innerHTML = "";
+  if(saList) saList.innerHTML = "";
+
+  departmentsList.forEach(d => {
+    if(grid) {
+      const t = document.createElement('div'); t.className = "dept-tile";
+      t.onclick = () => selectDept(d.code, d.name);
+      t.innerHTML = `<div class="dept-tile-name">${d.code}</div><div class="dept-tile-sub">${d.name}</div>`;
+      grid.appendChild(t);
+    }
+    if(saList) {
+      const r = document.createElement('div'); r.className = "srow";
+      r.innerHTML = `<div class="av">${d.code.slice(0,2)}</div><div style="flex:1;"><div class="sname">${d.name} (<code>${d.code}</code>)</div><div class="smeta">PIN: ${d.pin}</div></div>`;
+      saList.appendChild(r);
+    }
+  });
+}
+
+function selectDept(code, name) {
+  DEPT = code; DEPT_NAME = name;
+  $('dept-indicator').innerText = code;
+  show($('dept-indicator'));
+  hide($('dept-overlay'));
+  if(code==='SUPER') { show($('tab-sa-btn')); adminTab('superadmin'); }
+  else { hide($('tab-sa-btn')); adminTab('setup'); }
+}
+
+function submitDeptPin() {
+  const code = $('dept-code-input').value.trim().toUpperCase();
+  const pin = $('dept-pin-input').value.trim();
+  const err = $('dept-pin-err');
+  err.innerText = "";
+
+  if(code === 'SUPER' && pin === '2026') { selectDept('SUPER', 'System Master'); return; }
+  const d = departmentsList.find(x => x.code === code);
+  if(d && d.pin === pin) { selectDept(d.code, d.name); }
+  else { err.innerText = "Invalid access verification credentials matching paths."; }
+}
+
+async function saveDepartment() {
+  const code = $('sa-code').value.trim().toUpperCase();
+  const name = $('sa-name').value.trim();
+  const pin = $('sa-pin').value.trim();
+  if(!code || !name || !pin) return;
+  await supabase.from('departments').upsert([{ code, name, pin }]);
+  $('sa-code').value=""; $('sa-name').value=""; $('sa-pin').value="";
+  await loadDepartments();
+  $('sa-msg').innerHTML = `<span style="color:var(--green)">Saved successfully!</span>`;
+}
+
+async function commitSessionToCloud() {
+  const c = $('a-course').value.trim();
+  const code = $('a-code').value.trim();
+  const d = $('a-date').value;
+  const t = $('a-time').value;
+  const pass = $('a-pass').value.trim().toUpperCase();
+  if(!c || !code || !d || !pass) { alert("Missing operational configuration inputs."); return; }
+
+  activeShortKey = (c+code+d+t).toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,24) || 's'+Date.now().toString(36);
+  sessionPass = pass;
+
+  await supabase.from('sessions').upsert([{
+    id: activeShortKey, dept_code: DEPT, course_name: c, course_code: code, session_date: d, session_time: t,
+    lecturer: $('a-lec').value, facilitator: $('a-facilitator').value, password: pass, roster_json: {students, faculty}
+  }]);
+
+  updateLinks(); adminTab('links'); showToast("Session uploaded.");
+}
+
+async function fetchLiveSignins() {
+  if(!activeShortKey) return;
+  const { data } = await supabase.from('attendance').select('*').eq('session_id', activeShortKey);
+  if(!data) return;
+
+  students.forEach(s => { s.signed=false; s.sigData=null; s.time=null; });
+  faculty.forEach(f => { f.signed=false; f.sigData=null; f.time=null; });
+
+  data.forEach(r => {
+    if(r.role === 'Student') {
+      let s = students.find(x => x.id === r.identifier);
+      if(!s) { s={name:r.name, id:r.identifier, prog:r.program_or_dept, contact:r.contact_or_email}; students.push(s); }
+      s.signed=true; s.sigData=r.sig_data; s.time=new Date(r.signed_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    } else {
+      let f = faculty.find(x => x.id === r.identifier);
+      if(!f) { f={name:r.name, id:r.identifier, dept:r.program_or_dept, email:r.contact_or_email}; faculty.push(f); }
+      f.signed=true; f.sigData=r.sig_data; f.time=new Date(r.signed_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    }
+  });
+  renderStuList(); renderTrackUI();
+}
+
+async function submitSignatureToCloud() {
+  const err = $('st-serr'); err.innerText="";
+  if(!$('st-chk').checked || isCanvasEmpty()) { err.innerText="Validation marks requirements incomplete."; return; }
+
+  const b64 = sCanvas.toDataURL('image/png');
+  let name="", id="", prog="", contact="", role=$('st-role').value==='student'?'Student':'Faculty';
+
+  if(curIsCustom) {
+    name=$('st-custom-name').value.trim(); id=$('st-custom-id').value.trim().toUpperCase();
+    prog=role==='Student'?$('st-custom-prog').value:$('st-custom-dept').value;
+    contact=role==='Student'?$('st-custom-contact').value:$('st-custom-email').value;
+  } else {
+    const arr = role==='Student'?students:faculty;
+    const m = arr.find(x => x.id === curSid);
+    name=m.name; id=m.id; prog=role==='Student'?m.prog:m.dept; contact=role==='Student'?m.contact:m.email;
+  }
+
+  const { error } = await supabase.from('attendance').insert([{
+    session_id:activeShortKey, dept_code:DEPT, role, name, identifier:id, program_or_dept:prog, contact_or_email:contact, sig_data:b64
+  }]);
+
+  if(error) { err.innerText=error.message; return; }
+  hide($('st-s2')); show($('st-s3')); showToast("Saved successfully!");
+}
+
+function adminTab(t) {
+  ['setup', 'links', 'track', 'history', 'superadmin'].forEach(x => { hide($('at-'+x)); if($('btn-at-'+x)) $('btn-at-'+x).classList.remove('on'); });
+  show($('at-'+t)); if($('btn-at-'+t)) $('btn-at-'+t).classList.add('on');
+  if(t==='track') { fetchLiveSignins(); window.tInt = setInterval(fetchLiveSignins,10000); }
+  else { clearInterval(window.tInt); }
+  if(t==='history') loadHistories();
+}
+
+async function loadHistories() {
+  const { data } = await supabase.from('sessions').select('*').eq('dept_code', DEPT).order('created_at',{ascending:false});
+  const box = $('history-list'); box.innerHTML = "";
+  if(!data || data.length===0) { box.innerHTML="<p style='color:var(--gray-400);font-size:13px;'>No sessions tracked.</p>"; return; }
+  data.forEach(s => {
+    const div = document.createElement('div'); div.className="srow"; div.style.cursor="pointer";
+    div.onclick = () => { activeShortKey=s.id; sessionPass=s.password; students=s.roster_json.students||[]; faculty=s.roster_json.faculty||[]; adminTab('track'); };
+    div.innerHTML = `<div class="av">📚</div><div style="flex:1;"><div class="sname">${s.course_name}</div><div class="smeta">${s.session_date} • Key: ${s.id}</div></div>`;
+    box.appendChild(div);
+  });
+}
+
+function updateLinks() {
+  if(!activeShortKey) return;
+  const link = `${window.location.origin}${window.location.pathname}?s=${activeShortKey}&d=${btoa(JSON.stringify({pass:$('a-pass').value}))}`;
+  $('session-link').innerText = link;
+  $('wa-template').innerText = `*Attendance Portal Registration Link*\nCourse: ${$('a-course').value}\nLink: ${link}\nPassword: *${$('a-pass').value}*`;
+}
+
+function addStu() {
+  students.push({name:$('s-name').value, id:$('s-id').value.toUpperCase(), prog:$('s-prog').value, contact:$('s-contact').value, signed:false});
+  $('s-name').value=""; $('s-id').value=""; renderStuList();
+}
+function addFaculty() {
+  faculty.push({name:$('f-name').value, id:$('f-id').value.toUpperCase(), dept:$('f-dept').value, email:$('f-email').value, signed:false});
+  $('f-name').value=""; $('f-id').value="";
+}
+function renderStuList() {
+  const b = $('stu-list'); if(!b) return; b.innerHTML="";
+  students.forEach((s,i)=>{
+    const r = document.createElement('div'); r.className="srow";
+    r.innerHTML=`<div class="av">${i+1}</div><div style="flex:1;"><div class="sname">${s.name} (${s.id})</div></div>`;
+    b.appendChild(r);
+  });
+}
+
+function renderTrackUI() {
+  const l = $('live-list'); l.innerHTML=""; let p=0;
+  students.forEach(s=>{
+    if(s.signed) p++;
+    const r=document.createElement('div'); r.className="srow";
+    r.innerHTML=`<div class="av">${s.signed?'✔':'❌'}</div><div style="flex:1;"><div class="sname">${s.name}</div></div><span class="badge ${s.signed?'b-signed':'b-absent'}">${s.signed?'Present':'Absent'}</span>`;
+    l.appendChild(r);
+  });
+  const fl=$('live-faculty-list'); fl.innerHTML="";
+  faculty.forEach(f=>{
+    const r=document.createElement('div'); r.className="srow";
+    r.innerHTML=`<div class="av">F</div><div style="flex:1;"><div class="sname">${f.name}</div></div><span class="badge ${f.signed?'b-signed':'b-pending'}">${f.signed?'Present':'Pending'}</span>`;
+    fl.appendChild(r);
+  });
+  $('t-total').innerText=students.length; $('t-signed').innerText=p; $('t-absent').innerText=students.length-p;
+  $('t-pct').innerText=students.length?Math.round((p/students.length)*100)+'%':'0%';
+}
+
+function toggleRoleFields() {
+  if($('st-role').value==='student') { show($('fields-custom-student')); hide($('fields-custom-faculty')); show($('row-st-pass')); }
+  else { hide($('fields-custom-student')); show($('fields-custom-faculty')); hide($('row-st-pass')); }
+  popRoster();
+}
+function popRoster() {
+  const s=$('st-select-user'); s.innerHTML="<option value=''>-- Select from List --</option>";
+  const arr = $('st-role').value==='student'?students:faculty;
+  arr.forEach(x=>{ const o=document.createElement('option'); o.value=x.id; o.innerText=x.name; s.appendChild(o); });
+}
+
+function goToSignatureCanvas() {
+  const r = $('st-role').value; const sel = $('st-select-user').value; const m = $('st-validation-msg'); m.innerText="";
+  if(!sel) {
+    if(!$('st-custom-name').value || !$('st-custom-id').value) { m.innerText="Select profile or insert details manually."; return; }
+    curIsCustom=true; curSid=$('st-custom-id').value.toUpperCase(); $('st-hello-name').innerText=$('st-custom-name').value;
+  } else {
+    curIsCustom=false; curSid=sel; const arr=r==='student'?students:faculty; $('st-hello-name').innerText=arr.find(x=>x.id===sel).name;
+  }
+  if(r==='student' && $('st-pass').value.trim().toUpperCase() !== sessionPass) { m.innerText="Invalid session password token verification values."; return; }
+  hide($('st-s1')); show($('st-s2')); clearCanvas();
+}
+
+function resetIngestionForm() { hide($('st-s2')); hide($('st-s3')); show($('st-s1')); $('st-custom-name').value=""; $('st-custom-id').value=""; if($('st-chk')) $('st-chk').checked=false; }
+function openStudentPreview() { hide($('pg-admin')); show($('pg-student')); resetIngestionForm(); }
+function exitStudentView() { hide($('pg-student')); show($('pg-admin')); }
+
+async function evaluateURL() {
+  const p = new URLSearchParams(window.location.search); if(!p.get('s')) return;
+  activeShortKey = p.get('s');
+  try { sessionPass = JSON.parse(atob(p.get('d'))).pass; } catch(e){}
+  const { data } = await supabase.from('sessions').select('*').eq('id', activeShortKey).single();
+  if(data) {
+    DEPT=data.dept_code; $('st-card-course').innerText=data.course_name; $('st-card-meta').innerText=`Lecturer: ${data.lecturer}`;
+    students=data.roster_json.students||[]; faculty=data.roster_json.faculty||[];
+    hide($('dept-overlay')); hide($('pg-admin')); show($('pg-student')); resetIngestionForm();
+  }
+}
+
+function initCanvas() {
+  sCanvas = $('st-canvas'); if(!sCanvas) return; sCtx = sCanvas.getContext('2d');
+  sCanvas.width = 460; sCanvas.height = 140; sCtx.lineWidth = 2.5; sCtx.lineCap = 'round'; sCtx.strokeStyle = '#141820';
+  const getP = (e) => { const r = sCanvas.getBoundingClientRect(); const t = e.touches?e.touches[0]:e; return { x: t.clientX - r.left, y: t.clientY - r.top }; };
+  sCanvas.addEventListener('mousedown', (e)=>{ sDrawing=true; sCtx.beginPath(); const p=getP(e); sCtx.moveTo(p.x,p.y); });
+  sCanvas.addEventListener('mousemove', (e)=>{ if(!sDrawing)return; const p=getP(e); sCtx.lineTo(p.x,p.y); sCtx.stroke(); });
+  window.addEventListener('mouseup', ()=>sDrawing=false);
+  sCanvas.addEventListener('touchstart', (e)=>{ sDrawing=true; sCtx.beginPath(); const p=getP(e)[0]||getP(e); sCtx.moveTo(p.x,p.y); }, {passive:true});
+  sCanvas.addEventListener('touchmove', (e)=>{ if(!sDrawing)return; const p=getP(e); sCtx.lineTo(p.x,p.y); sCtx.stroke(); }, {passive:true});
+}
+function clearCanvas() { if(sCtx) sCtx.clearRect(0,0,sCanvas.width,sCanvas.height); }
+function isCanvasEmpty() { const b = new Uint32Array(sCtx.getImageData(0,0,sCanvas.width,sCanvas.height).data.buffer); return !b.some(c=>c!==0); }
+
+function genPass() { const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let p=""; for(let i=0;i<6;i++)p+=c.charAt(Math.floor(Math.random()*c.length)); $('a-pass').value=p; updateLinks(); }
+function loadSample() { students=[{name:"MUGISHA Emmanuel",id:"AHSU011",prog:"OBG Y2",contact:"0788123456",signed:false},{name:"UWASE Marie Claire",id:"AHSU012",prog:"OBG Y2",contact:"claire@ahsu.ac.rw",signed:false}]; renderStuList(); }
+function copyLink() { navigator.clipboard.writeText($('session-link').innerText); showToast("Link Copied!"); }
+function copyWA() { navigator.clipboard.writeText($('wa-template').innerText); showToast("Message Copied!"); }
+function showToast(m) { const t=$('toast'); t.innerText=m; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2000); }
+function clearSession() { students=[]; faculty=[]; renderStuList(); }
+
+function exportCSV() {
+  const r = [['#','Role','Name','ID','Program','Contact','Status','Time']];
+  students.forEach((s,i)=>r.push([i+1,'Student',s.name,s.id,s.prog,s.contact,s.signed?'Present':'Absent',s.time||'']));
+  const csv = r.map(x=>x.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const b = new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="Attendance.csv"; a.click();
+}
+function exportPDF() {
+  let sHtml = ''; students.forEach((s,i)=>{ sHtml += `<p>${i+1}. ${s.name} (${s.id}) — ${s.signed?'🟢 Present':'❌ Absent'} ${s.time||''}</p>`; });
+  const w = window.open('','_blank'); w.document.write(`<html><body><h2>AHSU Attendance Report</h2><h3>Course: ${$('a-course').value}</h3>${sHtml}</body></html>`); w.document.close();
+}
+</script>
+</body>
+</html>
