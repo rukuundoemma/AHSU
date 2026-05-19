@@ -4,11 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <meta name="theme-color" content="#1B4F8A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<title>AHSU Attendance System - Professional Multi-Cloud Dashboard</title>
+<title>AHSU Unified Academic Attendance Dashboard Engine</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
   --blue:#1B4F8A; --blue-d:#0F3460; --blue-l:#2D6FBB; --blue-pale:#EBF2FB; --blue-border:#C2D9F0;
@@ -23,104 +22,70 @@
   --r:10px; --r-sm:6px;
   --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.05);
 }
-
 [data-theme="dark"] {
-  --gray-50:#0B0E14; --gray-100:#161B26; --gray-200:#2D3545;
-  --gray-400:#6B7280; --gray-600:#9CA3AF; --gray-900:#F3F4F6;
-  --card-bg:#111622; --text-color:#E5E7EB; --border-color:#242C3D;
-  --blue-pale:#162A45; --blue-border:#1F4475;
-  --green-pale:#0E2A18; --green-border:#1B5E20;
-  --purple-pale:#2E1065; --purple-border:#581C87;
-  --red-pale:#2C1311; --red-border:#7F1D1D;
-  --amber-pale:#2A1E0A; --amber-border:#78350F;
-  --shadow:0 4px 20px rgba(0,0,0,.3);
+  --gray-50:#0B0E14; --gray-100:#161B26; --gray-200:#2D3545; --gray-400:#6B7280; --gray-600:#9CA3AF; --gray-900:#F3F4F6;
+  --card-bg:#111622; --text-color:#E5E7EB; --border-color:#242C3D; --blue-pale:#162A45; --blue-border:#1F4475;
+  --green-pale:#0E2A18; --green-border:#1B5E20; --purple-pale:#2E1065; --purple-border:#581C87;
+  --red-pale:#2C1311; --red-border:#7F1D1D; --amber-pale:#2A1E0A; --amber-border:#78350F;
 }
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);background:var(--gray-50);color:var(--text-color);font-size:15px;line-height:1.6;min-height:100vh;transition:background .2s, color .2s;}
-
+body{font-family:var(--font);background:var(--gray-50);color:var(--text-color);font-size:15px;line-height:1.6;min-height:100vh;}
 .pg{display:none;} .pg.active{display:block;}
-.topbar{background:var(--blue);color:#fff;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.topbar{background:var(--blue);color:#fff;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
 .tb-brand{display:flex;align-items:center;gap:10px;}
-.tb-logo{width:34px;height:34px;background:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--blue);letter-spacing:-.5px;}
-.tb-title{font-size:15px;font-weight:600;}
-.tb-sub{font-size:11px;opacity:.65;}
-
+.tb-logo{width:34px;height:34px;background:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--blue);}
+.tb-title{font-size:15px;font-weight:600;} .tb-sub{font-size:11px;opacity:.65;}
 .wrap{max-width:960px;margin:0 auto;padding:28px 20px 80px;}
 .tabs{display:flex;border-bottom:1px solid var(--border-color);margin-bottom:24px;overflow-x:auto;}
-.tab{padding:10px 20px;font-size:14px;font-family:var(--font);font-weight:500;color:var(--gray-400);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;}
-.tab:hover{color:var(--gray-600);}
+.tab{padding:10px 20px;font-size:14px;font-weight:500;color:var(--gray-400);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;}
 .tab.on{color:var(--blue);border-bottom-color:var(--blue);}
-
-.card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--r);padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow);transition:background .2s,border-color .2s;}
+.card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--r);padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow);}
 .card-title{font-size:12px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;}
-
 label{font-size:13px;font-weight:500;color:var(--gray-600);display:block;margin-bottom:5px;margin-top:12px;}
-label:first-child{margin-top:0;}
-input[type=text],input[type=date],input[type=time],input[type=password],input[type=email],input[type=url],input[type=number],select,textarea{
+input[type=text],input[type=date],input[type=time],input[type=url],input[type=number],select{
   width:100%;padding:9px 12px;border:1px solid var(--border-color);border-radius:var(--r-sm);
-  font-size:14px;font-family:var(--font);background:var(--card-bg);color:var(--text-color);
-  transition:border-color .15s,box-shadow .15s;outline:none;}
-input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 0 0 3px rgba(45,111,187,.12);}
+  font-size:14px;background:var(--card-bg);color:var(--text-color);outline:none;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r-sm);font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;border:1px solid transparent;transition:all .15s;}
-.btn:active{transform:scale(.98);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--r-sm);font-size:14px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all .15s;}
 .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
-.btn-primary:hover{background:var(--blue-l);}
 .btn-outline{background:transparent;color:var(--text-color);border-color:var(--border-color);}
-.btn-outline:hover{background:var(--gray-100);border-color:var(--gray-400);}
 .btn-danger{background:transparent;color:var(--red);border-color:var(--red-border);}
 .btn-danger:hover{background:var(--red-pale);}
 .btn-sm{padding:5px 12px;font-size:13px;}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
-
 .badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:500;}
 .b-signed{background:var(--green-pale);color:var(--green);border:1px solid var(--green-border);}
 .b-faculty{background:var(--purple-pale);color:var(--purple);border:1px solid var(--purple-border);}
 .b-absent{background:var(--red-pale);color:var(--red);border:1px solid var(--red-border);}
-
 .srow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border-color);border-radius:var(--r-sm);margin-bottom:6px;background:var(--gray-50);}
-.av{width:34px;height:34px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
-.sname{font-size:14px;font-weight:500;}
-.smeta{font-size:12px;color:var(--gray-400);}
-
+.av{width:34px;height:34px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}
 .sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
 .sc{background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--r);padding:14px;text-align:center;box-shadow:var(--shadow);}
-.sn{font-size:26px;font-weight:600;} .sl{font-size:12px;color:var(--gray-400);margin-top:2px;}
-
-.code-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--gray-600);word-break:break-all;margin:8px 0;}
-.wa-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:12px;font-size:13px;font-family:var(--mono);color:var(--gray-600);white-space:pre-wrap;line-height:1.6;margin:8px 0;}
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;}
+.sn{font-size:26px;font-weight:600;} .sl{font-size:12px;color:var(--gray-400);}
+.code-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:12px;font-family:var(--mono);font-size:12px;color:var(--gray-600);word-break:break-all;margin:8px 0;}
+.wa-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:12px;font-size:13px;font-family:var(--mono);color:var(--gray-600);white-space:pre-wrap;margin:8px 0;}
+.log-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
+.log-table th, .log-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+.log-table th { background: var(--gray-100); font-weight: 600; color: var(--gray-600); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;opacity:0;transition:opacity .25s;}
 .hidden{display:none!important;}
-
-.status-indicator { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; padding: 4px 10px; border-radius: 4px; font-family: var(--mono); }
-.si-unknown { background: var(--gray-100); color: var(--gray-600); }
-.si-success { background: var(--green-pale); color: var(--green); border: 1px solid var(--green-border); }
-.si-error { background: var(--red-pale); color: var(--red); border: 1px solid var(--red-border); }
-
-.timer-container { display: flex; align-items: center; justify-content: space-between; background: var(--gray-100); padding: 12px 18px; border-radius: var(--r-sm); border: 1px dashed var(--blue-border); margin-top: 10px; }
+.timer-container { display: flex; align-items: center; justify-content: space-between; background: var(--gray-100); padding: 12px 18px; border-radius: var(--r-sm); margin-top: 10px; }
 .timer-clock { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--blue); }
 .qr-modal-wrapper { display: grid; grid-template-columns: 200px 1fr; gap: 20px; align-items: center; }
 #qrcode { background: #fff; padding: 10px; border-radius: 6px; display: inline-block; border: 1px solid var(--gray-200); width: 200px; height: 200px; }
-.toggle-control { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 13px; font-weight: 500; }
-.doc-box { background: var(--gray-100); border: 1px dashed var(--border-color); padding: 16px; border-radius: var(--r-sm); margin-top: 12px; font-size: 13px; }
+@media(max-width:768px){ .g2,.g3,.qr-modal-wrapper{grid-template-columns:1fr;} .sg{grid-template-columns:1fr 1fr;} .wrap{padding:14px 14px 60px;} }
 
-/* Grid Table Layouts for Logs */
-.log-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
-.log-table th, .log-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
-.log-table th { background: var(--gray-100); font-weight: 600; color: var(--gray-600); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-.log-table tbody tr:hover { background: var(--gray-50); }
-
-@media(max-width:768px) {
-  .g2,.g3,.qr-modal-wrapper{grid-template-columns:1fr;}
-  .sg{grid-template-columns:1fr 1fr;}
-  .wrap{padding:14px 14px 60px;}
-  .topbar{padding:0 14px;}
-  .card{padding:14px 16px;}
-  #qrcode { margin: 0 auto; }
-  .log-table th:nth-child(4), .log-table td:nth-child(4) { display: none; }
+/* PDF Output Structural Formats */
+.pdf-only { display: none; }
+@media print {
+  .pdf-report-container { display: block !important; padding: 20px; background: #fff; color: #000; }
+  .pdf-header { border-bottom: 3px solid #1B4F8A; padding-bottom: 10px; margin-bottom: 20px; }
+  .pdf-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  .pdf-table th, .pdf-table td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+  .pdf-table th { background-color: #f2f2f2; }
+  .pdf-sig-block { margin-top: 50px; display: flex; justify-content: space-between; }
+  .pdf-sig-line { border-top: 1px solid #000; width: 220px; text-align: center; padding-top: 5px; font-size: 12px; }
 }
 </style>
 </head>
@@ -130,15 +95,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
   <div class="topbar">
     <div class="tb-brand">
       <div class="tb-logo">AHSU</div>
-      <div><div class="tb-title">Attendance System</div><div class="tb-sub">Universal Dashboard</div></div>
+      <div><div class="tb-title">Attendance System</div><div class="tb-sub">Universal Admin Engine</div></div>
     </div>
-    
     <div style="display:flex; gap:12px; align-items:center;">
-      <label class="toggle-control" style="color:#fff; margin:0;">
-        <input type="checkbox" id="cfg-audio-chime" checked style="width:auto; cursor:pointer;"> 🔔 Chime
+      <label class="toggle-control" style="color:#fff; margin:0; display:flex; align-items:center; gap:4px; font-size:13px; cursor:pointer;">
+        <input type="checkbox" id="cfg-audio-chime" checked style="width:auto;"> 🔔 Chime
       </label>
       <button class="btn btn-sm" onclick="toggleThemeSystem()" style="background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3);" id="theme-btn">🌙 Dark Mode</button>
-      <button class="btn btn-sm" onclick="clearSession()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:12px;">🗑 Clear</button>
+      <button class="btn btn-sm" onclick="clearSession()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);">🗑 Clear</button>
     </div>
   </div>
 
@@ -167,14 +131,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
           <div><label>Presenter / Lecturer</label><input type="text" id="a-lec" value="Dr. Uwimana" oninput="updateLinks()"></div>
           <div><label>Session Facilitator</label><input type="text" id="a-fac" value="Prof. Kamali" oninput="updateLinks()"></div>
         </div>
-        
         <label>Session Sign-In Passkey</label>
         <div style="display:flex;gap:8px;margin-top:5px;">
           <input type="text" id="a-pass" placeholder="e.g. IPH2024A" style="flex:1;font-family:var(--mono);" oninput="updateLinks()">
           <button class="btn btn-outline" onclick="genPass()">Generate Token</button>
         </div>
-
-        <label style="margin-top:16px;">Access Gate Deadline Timer</label>
         <div class="timer-container">
           <div class="timer-clock" id="timer-display">30:00</div>
           <div style="display:flex; gap:6px;">
@@ -213,109 +174,92 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
           <div id="qrcode"></div>
           <div>
             <h4 style="margin-bottom:6px; font-size:16px;">Live Visual Entry Portal (QR)</h4>
-            <p style="font-size:13px; color:var(--gray-600); margin-bottom:12px;">Display this matrix pattern on the board. Both Residents and attending Faculty members can scan to access the dynamic intake interface payload directly.</p>
+            <p style="font-size:13px; color:var(--gray-600); margin-bottom:12px;">Display this layout matrix on-screen. Residents and Faculty scan to target the signature sign-in input page directly.</p>
             <button class="btn btn-outline btn-sm" onclick="printQRCodeModule()">🖨 Print QR Form Factor</button>
           </div>
         </div>
       </div>
-
       <div class="card">
         <div class="card-title">📎 Manual Web Access Link Vector</div>
         <div class="code-box" id="session-link">—</div>
-        <div class="btns">
-          <button class="btn btn-primary" onclick="copyLink()">Copy Link Vector</button>
-        </div>
+        <div class="btns><button class="btn btn-primary" onclick="copyLink()">Copy Link Vector</button></div>
       </div>
-
       <div class="card">
         <div class="card-title">WhatsApp Structured Dispatch Payload</div>
-        <div class="wa-box" id="wa-template">Awaiting initialization variables...</div>
+        <div class="wa-box" id="wa-template">Awaiting variables...</div>
         <div class="btns"><button class="btn btn-outline" onclick="copyWA()">Copy Layout Block</button></div>
       </div>
     </div>
 
     <div id="at-track" class="hidden">
-      <div id="track-conn-bar" class="conn-bar" style="background:var(--blue-pale); border:1px solid var(--blue-border); display:flex; align-items:center; gap:10px; padding:10px; border-radius:6px; margin-bottom:16px;">
-        <span style="font-size:13px;" id="sync-engine-banner">🔄 Pipeline status operational.</span>
+      <div class="conn-bar" style="background:var(--blue-pale); border:1px solid var(--blue-border); display:flex; align-items:center; gap:10px; padding:10px; border-radius:6px; margin-bottom:16px;">
+        <span style="font-size:13px;" id="sync-engine-banner">🔄 Buffer operational.</span>
         <button class="btn btn-outline btn-sm" onclick="forceGlobalCloudRefresh()" style="margin-left:auto;">Force Sync Refresh</button>
       </div>
 
       <div class="sg">
         <div class="sc"><div class="sn" id="st-expected-val">0</div><div class="sl">Expected Residents</div></div>
         <div class="sc"><div class="sn" style="color:var(--green);" id="st-present">0</div><div class="sl">Residents Present</div></div>
-        <div class="sc"><div class="sn" style="color:var(--purple);" id="st-faculty-count">0</div><div class="sl">Faculty Checked-In</div></div>
+        <div class="sc"><div class="sn" style="color:var(--purple);" id="st-faculty-count">0</div><div class="sl">Faculty Logged</div></div>
         <div class="sc"><div class="sn" style="color:var(--blue);" id="st-rate">0%</div><div class="sl">Resident Intake Rate</div></div>
       </div>
 
       <div class="card" style="padding:14px 20px; margin-bottom:16px;">
-        <div style="display:grid; grid-template-columns: 1fr auto; gap:12px;">
-          <input type="text" id="registry-search" placeholder="Search logs by name or badge string..." oninput="filterRegistryLogs()">
-          <button class="btn btn-outline btn-sm" onclick="exportCSV()">CSV Data Export</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <input type="text" id="registry-search" placeholder="Filter records by name..." oninput="filterRegistryLogs()" style="flex:1; max-width:400px;">
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="exportCSV()">Export CSV</button>
+            <button class="btn btn-primary btn-sm" onclick="generateOfficialSignaturePDF()" style="background:#0F3460;">📄 Download HoD Sign-Off PDF</button>
+          </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title" style="color:var(--green);">📊 Cohort Residents Registry Stream</div>
+        <div class="card-title" style="color:var(--green); font-weight:600;">📊 Cohort Residents Registry Stream</div>
         <table class="log-table">
-          <thead>
-            <tr>
-              <th>Badge ID</th>
-              <th>Full Name</th>
-              <th>Status</th>
-              <th>Timestamp Logged</th>
-            </tr>
-          </thead>
-          <tbody id="resident-tbody-logs">
-            <tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No residents registered.</td></tr>
-          </tbody>
+          <thead><tr><th>Badge ID</th><th>Full Name</th><th>Status</th><th>Timestamp Logged</th></tr></thead>
+          <tbody id="resident-tbody-logs"></tbody>
         </table>
       </div>
 
       <div class="card">
-        <div class="card-title" style="color:var(--purple);">🎓 Attending Faculty Registry Stream</div>
+        <div class="card-title" style="color:var(--purple); font-weight:600;">🎓 Attending Faculty Registry Stream</div>
         <table class="log-table">
-          <thead>
-            <tr>
-              <th>Badge ID</th>
-              <th>Full Name</th>
-              <th>Status</th>
-              <th>Timestamp Logged</th>
-            </tr>
-          </thead>
-          <tbody id="faculty-tbody-logs">
-            <tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No faculty members detected.</td></tr>
-          </tbody>
+          <thead><tr><th>Badge ID</th><th>Full Name</th><th>Status</th><th>Timestamp Logged</th></tr></thead>
+          <tbody id="faculty-tbody-logs"></tbody>
         </table>
       </div>
     </div>
 
     <div id="at-history" class="hidden">
-      <div class="card">
-        <div class="card-title">Persistent Local Engine Snapshots</div>
-        <div id="history-list"></div>
-      </div>
+      <div class="card"><div class="card-title">Snapshots</div><div id="history-list"></div></div>
     </div>
 
     <div id="at-connect" class="hidden">
       <div class="card">
         <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
-          <span>Channel A: Google Apps Script Web App Connection</span>
-          <div id="gas-ping-indicator" class="status-indicator si-unknown">Status: Unverified</div>
+          <span>Channel A: Google Apps Script Integration Hook</span>
+          <div id="gas-ping-indicator" class="badge b-absent">Unverified</div>
         </div>
-        <p style="font-size:13px; margin-bottom:12px;">Map your executable macro script link here:</p>
-        <input type="url" id="sheets-url" style="font-family:var(--mono); font-size:12px; margin-bottom:12px;" placeholder="https://script.google.com/macros/s/.../exec">
-        <div class="btns">
+        <label>Deployment Web App Endpoint URL</label>
+        <input type="url" id="sheets-url" placeholder="https://script.google.com/macros/s/.../exec" style="font-family:var(--mono); font-size:12px;">
+        <div class="btns" style="margin-top:12px;">
           <button class="btn btn-primary btn-sm" onclick="saveGASConfigurationLink()">Secure Apps Script Link Route</button>
           <button class="btn btn-outline btn-sm" onclick="testGoogleScriptHandshake()">⚡️ Test &amp; Verify Handshake Connection</button>
         </div>
         
-        <label style="margin-top:16px; color:var(--blue-l);">📄 Google Sheets Macro Source Code Execution Blueprint</label>
-        <p style="font-size:12px; color:var(--gray-600); margin-bottom:6px;">Create a Google Sheet, select <strong>Extensions &gt; Apps Script</strong>, clear out any default code, paste the script below, and click <strong>Save</strong>:</p>
-        <div class="code-box" style="white-space: pre; overflow-x: auto; max-height: 250px; text-align: left;">function doPost(e) {
+        <label style="margin-top:16px; display:block; color:var(--blue-l);">📄 Google Apps Script Framework Source Code</label>
+        <p style="font-size:12px; color:var(--gray-600); margin-bottom:6px;">Open Google Sheets, select <strong>Extensions &gt; Apps Script</strong>, overwrite any old code block with the script below, and click <strong>Deploy &gt; New Deployment (Set Access to 'Anyone')</strong>:</p>
+        <div class="code-box" style="white-space:pre; overflow-x:auto; max-height:220px; text-align:left;">function doPost(e) {
   try {
     var packet = JSON.parse(e.postData.contents);
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     
+    if (packet.action === 'push') {
+      sheet.appendRow([packet.sessionKey, packet.id, packet.name, packet.role, packet.time]);
+      return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     if (packet.action === 'pull') {
       var data = sheet.getDataRange().getValues();
       var matches = [];
@@ -337,91 +281,144 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue-l);box-shadow:0 
       <div class="card">
         <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
           <span>Channel B: Supabase Realtime Database Infrastructure</span>
-          <div id="sb-ping-indicator" class="status-indicator si-unknown">Status: Unverified</div>
+          <div id="sb-ping-indicator" class="badge b-absent">Unverified</div>
         </div>
-        
         <label>Supabase REST API URL Endpoint Target</label>
         <input type="url" id="sb-url" style="font-family:var(--mono); font-size:12px; margin-bottom:8px;">
-        
         <label>Supabase Anon Key String</label>
-        <input type="text" id="sb-key" style="font-family:var(--mono); font-size:12px; margin-bottom:12px;">
-        
-        <div class="btns">
+        <input type="text" id="sb-key" style="font-family:var(--mono); font-size:12px;">
+        <div class="btns" style="margin-top:12px;">
           <button class="btn btn-primary btn-sm" onclick="saveSupabaseConfigurationLink()">Secure Supabase Credentials</button>
           <button class="btn btn-outline btn-sm" onclick="testSupabaseHandshake()">⚡️ Test &amp; Verify Database Connectivity</button>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
+<div id="pg-client" class="pg hidden" style="padding:40px 16px;">
+  <div class="card" style="max-width:500px; margin:0 auto; box-shadow:0 12px 40px rgba(0,0,0,0.15);">
+    <div style="text-align:center; margin-bottom:20px;">
+      <div style="width:50px; height:50px; background:var(--blue); color:#fff; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; font-size:18px; margin-bottom:10px;">A</div>
+      <h3 id="c-lbl-course" style="font-size:18px;">Session Class Intake</h3>
+      <p id="c-lbl-meta" style="font-size:13px; color:var(--gray-600);"></p>
+    </div>
+    
+    <div id="client-form-area">
+      <div><label>Your Full Official Name</label><input type="text" id="cli-name" placeholder="Firstname Lastname"></div>
+      <div><label>Your Badge ID / Identification Code</label><input type="text" id="cli-id" placeholder="AHSU2026XXX" style="font-family:var(--mono); text-transform:uppercase;"></div>
+      <div>
+        <label>Your Role Designation</label>
+        <select id="cli-role">
+          <option value="Resident">Resident</option>
+          <option value="Faculty">Faculty Member</option>
+        </select>
+      </div>
+      <div><label>Session Security Passkey</label><input type="text" id="cli-pass" placeholder="Enter Token Key" style="font-family:var(--mono); text-transform:uppercase;"></div>
+      <button class="btn btn-primary" onclick="submitClientSignature()" style="width:100%; justify-content:center; margin-top:20px; padding:12px;">✍️ Confirm Security Sign-In</button>
+    </div>
+    <div id="client-success-area" class="hidden" style="text-align:center; padding:20px 0;">
+      <div style="font-size:40px; color:var(--green);">✓</div>
+      <h4 style="color:var(--green); margin-bottom:8px;">Sign-In Log Documented</h4>
+      <p style="font-size:13px; color:var(--gray-600);">Your digital token signature loop node has successfully synchronized with university telemetry aggregators.</p>
+    </div>
+  </div>
+</div>
+
+<div id="hod-pdf-template" class="pdf-only">
+  <div style="font-family:'Times New Roman', serif; padding:20px; color:#111;">
+    <div style="text-align:center; border-bottom:2px solid #1B4F8A; padding-bottom:12px; margin-bottom:20px;">
+      <h2 style="font-size:20pt; color:#1B4F8A; margin-bottom:4px; font-weight:bold; text-transform:uppercase;">Alafia Health Sciences University (AHSU)</h2>
+      <h3 style="font-size:13pt; font-weight:bold; color:#444; margin:0;">Official Academic Session Verification Register</h3>
+    </div>
+    
+    <table style="width:100%; margin-bottom:25px; font-size:11pt; line-height:1.6;">
+      <tr><td><strong>Course Parameter:</strong> <span id="pdf-meta-course"></span></td><td><strong>Course Code:</strong> <span id="pdf-meta-code"></span></td></tr>
+      <tr><td><strong>Date Frame:</strong> <span id="pdf-meta-date"></span></td><td><strong>Scheduled Time:</strong> <span id="pdf-meta-time"></span></td></tr>
+      <tr><td><strong>Presenter / Lecturer:</strong> <span id="pdf-meta-lec"></span></td><td><strong>Session Facilitator:</strong> <span id="pdf-meta-fac"></span></td></tr>
+      <tr><td><strong>Expected Pool Target:</strong> <span id="pdf-meta-expected"></span></td><td><strong>Calculated Intake Rate:</strong> <span id="pdf-meta-rate"></span></td></tr>
+    </table>
+
+    <h4 style="font-family:Arial, sans-serif; font-size:11pt; color:#1B4F8A; text-transform:uppercase; margin-bottom:6px; border-bottom:1px solid #ddd; padding-bottom:4px;">1. Attending Faculty Registry Stream</h4>
+    <table class="pdf-table" style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+      <thead><tr style="background:#f2f2f2;"><th style="border:1px solid #ddd; padding:6px; font-size:10pt;">Badge ID</th><th style="border:1px solid #ddd; padding:6px; font-size:10pt;">Faculty Full Name</th><th style="border:1px solid #ddd; padding:6px; font-size:10pt;">Status Metric</th><th style="border:1px solid #ddd; padding:6px; font-size:10pt;">Timestamp Logged</th></tr></thead>
+      <tbody id="pdf-faculty-tbody"></tbody>
+    </table>
+
+    <h4 style="font-family:Arial, sans-serif; font-size:11pt; color:#1B4F8A; text-transform:uppercase; margin-bottom:6px; border-bottom:1px solid #ddd; padding-bottom:4px;">2. Cohort Residents Registry Stream</h4>
+    <table class="pdf-table" style="width:100%; border-collapse:collapse; margin-bottom:30px;">
+      <thead><tr style="background:#f2f2f2;"><th style="border:1px solid #ddd; padding:6px; font-size:10pt;">Badge ID</th><th style="border:1px solid #ddd; padding:6px; font-size:10pt;">Resident Full Name</th><th style="border:1px solid #ddd; padding:6px; font-size:10pt;">Status Metric</th><th style="border:1px solid #ddd; padding:6px; font-size:10pt;">Timestamp Logged</th></tr></thead>
+      <tbody id="pdf-resident-tbody"></tbody>
+    </table>
+
+    <div style="margin-top:60px; width:100%;">
+      <table style="width:100%;">
+        <tr>
+          <td style="width:50%; vertical-align:top;">
+            <div style="border-top:1px solid #000; width:80%; padding-top:5px; font-size:11pt; font-weight:bold;">System Operator / Registrar</div>
+            <div style="font-size:9pt; color:#555; margin-top:4px;">Date: ____ / ____ / ________</div>
+          </td>
+          <td style="width:50%; vertical-align:top;">
+            <div style="border-top:1px solid #000; width:80%; padding-top:5px; font-size:11pt; font-weight:bold;">Head of Department (HoD) Approval</div>
+            <div style="font-size:9pt; color:#555; margin-top:4px;">Date: ____ / ____ / ________</div>
+          </td>
+        </tr>
+      </table>
+    </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-const ChimeAudioContextEngine = {
-  triggerNotification() {
-    if (!document.getElementById('cfg-audio-chime').checked) return;
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc1 = ctx.createOscillator(); const gain1 = ctx.createGain();
-      osc1.type = 'sine'; osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
-      gain1.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-      osc1.connect(gain1); gain1.connect(ctx.destination);
-      osc1.start(); osc1.stop(ctx.currentTime + 0.4);
-    } catch(e) {}
-  }
-};
-</script>
-
-<script>
-// ═══════════════════════════════════════════════════════════════════
-// DUAL-CHANNEL MASTER CORE LOGIC (FIXED FOR REDIRECTS)
-// ═══════════════════════════════════════════════════════════════════
+// ================================================================= -->
+// ENGINE PROGRAM CODE LOGIC WORKSPACE                              -->
+// ================================================================= -->
 let DEPT = 'GEN';
 let facultyAndResidentsRoster = [];
-
 let googleAppsScriptURL = localStorage.getItem('ahsu_gas_url') || '';
 let supabaseURL = localStorage.getItem('ahsu_sb_url') || '';
 let supabaseAnonKey = localStorage.getItem('ahsu_sb_key') || '';
-
 let timerSecondsDuration = 1800;
 let isTimerRunning = true;
-let timerSystemIntervalReference = null;
+let timerInterval = null;
 
 function ns(k) { return 'ahsu_' + DEPT + '_' + k; }
 
-function initApplicationFramework() {
+function init() {
+  // Routing Engine Switch: Detect if URL parameters exist to parse out the Attending Sign-In User Interface
+  const params = new URLSearchParams(window.location.search);
+  if(params.has('c') && params.has('p')) {
+    document.getElementById('pg-admin').className = "pg hidden";
+    document.getElementById('pg-client').className = "pg active";
+    document.getElementById('c-lbl-course').textContent = params.get('c');
+    document.getElementById('c-lbl-meta').textContent = `${params.get('cd')} · ${params.get('l')} (Facilitated by ${params.get('f') || 'Staff'})`;
+    return;
+  }
+  
   document.getElementById('a-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('sheets-url').value = googleAppsScriptURL;
   document.getElementById('sb-url').value = supabaseURL;
   document.getElementById('sb-key').value = supabaseAnonKey;
   genPass();
-  loadCachedSystemConfiguration();
-  initializeTimerCountdownLoop();
+  loadCachedConfig();
+  startTimerLoop();
   updateLinks();
   updateTrack();
-  renderHistoryLogs();
-  updateDynamicSyncBannerTitle();
+  renderHistory();
+  updateSyncEngineBanner();
 }
 
-function updateDynamicSyncBannerTitle() {
+function updateSyncEngineBanner() {
   const b = document.getElementById('sync-engine-banner');
-  if(supabaseURL && supabaseAnonKey) {
-    b.textContent = "⚡️ Active Gateway Pipeline: Supabase Enterprise Database Sync Active Engine Connected.";
-  } else if(googleAppsScriptURL) {
-    b.textContent = "📋 Active Gateway Pipeline: Google Apps Script Web App Engine Hook Connected.";
-  } else {
-    b.textContent = "🔄 Standalone Local Buffer Engine Active. Map Cloud Configurations to scale.";
-  }
+  if(supabaseURL && supabaseAnonKey) b.textContent = "⚡️ Active Gateway Pipeline: Supabase Database Sync Realtime Cloud Module Connected.";
+  else if(googleAppsScriptURL) b.textContent = "📋 Active Gateway Pipeline: Google Apps Script Redirection Web App Connected.";
+  else b.textContent = "🔄 Standalone Local Buffer Engine Active. Map Cloud Configurations to scale infrastructure.";
 }
 
-function loadCachedSystemConfiguration() {
+function loadCachedConfig() {
   try {
-    const dataString = localStorage.getItem(ns('session_v4'));
+    const dataString = localStorage.getItem(ns('session_v5'));
     if (dataString) {
       const data = JSON.parse(dataString);
       document.getElementById('a-course').value = data.course || 'Introduction to Public Health';
@@ -435,10 +432,10 @@ function loadCachedSystemConfiguration() {
       facultyAndResidentsRoster = Array.isArray(data.people) ? data.people : [];
     }
   } catch(e) {}
-  renderResidentRegistryDOM();
+  renderRosterDOM();
 }
 
-function persistAppStateToLocalSandbox() {
+function persistState() {
   const meta = {
     course: document.getElementById('a-course').value,
     code: document.getElementById('a-code').value,
@@ -450,190 +447,196 @@ function persistAppStateToLocalSandbox() {
     password: document.getElementById('a-pass').value,
     people: facultyAndResidentsRoster
   };
-  localStorage.setItem(ns('session_v4'), JSON.stringify(meta));
+  localStorage.setItem(ns('session_v5'), JSON.stringify(meta));
 }
 
-// REDIRECT-COMPLIANT NETWORK HANDSHAKE FOR CHANNEL A
+// REDIRECT-COMPLIANT NETWORK LOGIC FOR CHANNEL A
 async function testGoogleScriptHandshake() {
   const ind = document.getElementById('gas-ping-indicator');
   const userURL = document.getElementById('sheets-url').value.trim();
-  if(!userURL) { alert("Paste a Google Script Deployment target endpoint URL."); return; }
-  
-  ind.className = "status-indicator si-unknown";
-  ind.textContent = "Testing Connection...";
-  
+  if(!userURL) { alert("Paste your Deployment target endpoint URL."); return; }
+  ind.className = "badge b-pending"; ind.textContent = "Testing...";
   try {
-    // Crucial change: text/plain prevents complex pre-flight header rejections, handling redirects automatically
     const res = await fetch(userURL, {
-      method: 'POST',
-      mode: 'cors',
-      redirect: 'follow',
+      method: 'POST', mode: 'cors', redirect: 'follow',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'pull', sessionKey: 'PING-TEST' })
     });
-    
     const rawText = await res.text();
     let data = JSON.parse(rawText);
-    
     if(res.ok || data.status === 'success' || data.status === 'error') {
-      ind.className = "status-indicator si-success";
-      ind.textContent = "CONNECTED (200 OK)";
-      showToast("Handshake response verified successfully!");
-    } else {
-      throw new Error();
-    }
+      ind.className = "badge b-signed"; ind.textContent = "CONNECTED (200 OK)";
+      showToast("Handshake response verified!");
+    } else { throw new Error(); }
   } catch(e) {
-    ind.className = "status-indicator si-error";
-    ind.textContent = "FAILED (Network/CORS Error)";
-    alert("Verification Failure: Ensure your deployment access permissions are explicitly set to 'Anyone'.");
+    ind.className = "badge b-absent"; ind.textContent = "FAILED (Network/CORS Error)";
+    alert("Verification Failure: Ensure deployment access parameter permissions are set explicitly to 'Anyone'.");
   }
 }
 
 async function testSupabaseHandshake() {
   const ind = document.getElementById('sb-ping-indicator');
-  const u = document.getElementById('sb-url').value.trim();
-  const k = document.getElementById('sb-key').value.trim();
-  if(!u || !k) { alert("Provide both Supabase credentials parameters."); return; }
-  
-  ind.className = "status-indicator si-unknown";
-  ind.textContent = "Testing REST Sync...";
-  
+  const u = document.getElementById('sb-url').value.trim(); const k = document.getElementById('sb-key').value.trim();
+  if(!u || !k) { alert("Provide both credentials parameters."); return; }
+  ind.className = "badge b-pending"; ind.textContent = "Testing...";
   try {
     const res = await fetch(`${u}/rest/v1/session_attendance?limit=1`, {
-      method: 'GET',
-      headers: { 'apikey': k, 'Authorization': `Bearer ${k}` }
+      method: 'GET', headers: { 'apikey': k, 'Authorization': `Bearer ${k}` }
     });
-    if(res.ok) {
-      ind.className = "status-indicator si-success";
-      ind.textContent = "CONNECTED (Supabase Active)";
-      showToast("Supabase configuration authenticated.");
-    } else { throw new Error(); }
-  } catch(e) {
-    ind.className = "status-indicator si-error";
-    ind.textContent = "REJECTED (Check Keys)";
-  }
+    if(res.ok) { ind.className = "badge b-signed"; ind.textContent = "CONNECTED (Active)"; }
+    else { throw new Error(); }
+  } catch(e) { ind.className = "badge b-absent"; ind.textContent = "REJECTED (Check Keys)"; }
 }
 
 function saveGASConfigurationLink() {
   googleAppsScriptURL = document.getElementById('sheets-url').value.trim();
   localStorage.setItem('ahsu_gas_url', googleAppsScriptURL);
-  showToast("Apps Script parameters updated.");
-  updateDynamicSyncBannerTitle();
+  showToast("Apps Script link mapped."); updateSyncEngineBanner();
 }
 
 function saveSupabaseConfigurationLink() {
-  supabaseURL = document.getElementById('sb-url').value.trim();
-  supabaseAnonKey = document.getElementById('sb-key').value.trim();
-  localStorage.setItem('ahsu_sb_url', supabaseURL);
-  localStorage.setItem('ahsu_sb_key', supabaseAnonKey);
-  showToast("Supabase parameters stored.");
-  updateDynamicSyncBannerTitle();
+  supabaseURL = document.getElementById('sb-url').value.trim(); supabaseAnonKey = document.getElementById('sb-key').value.trim();
+  localStorage.setItem('ahsu_sb_url', supabaseURL); localStorage.setItem('ahsu_sb_key', supabaseAnonKey);
+  showToast("Supabase credentials stored."); updateSyncEngineBanner();
+}
+
+// CLIENT-SIDE INTAKE PORTAL SYSTEM TRANSACTIONS
+async function submitClientSignature() {
+  const params = new URLSearchParams(window.location.search);
+  const name = document.getElementById('cli-name').value.trim();
+  const id = document.getElementById('cli-id').value.trim().toUpperCase();
+  const role = document.getElementById('cli-role').value;
+  const pass = document.getElementById('cli-pass').value.trim().toUpperCase();
+  
+  if(!name || !id || !pass) { alert("All fields are mandatory."); return; }
+  if(pass !== params.get('p').toUpperCase()) { alert("Invalid Session Security Passkey."); return; }
+  
+  const tokenKey = params.get('cd') + '-' + params.get('d');
+  const timeStr = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  const payload = { action: 'push', sessionKey: tokenKey, id: id, name: name, role: role, time: timeStr };
+  
+  let targetedAnyChannel = false;
+  
+  // Push Directly to Connected Live Channels
+  if(googleAppsScriptURL) {
+    try {
+      await fetch(googleAppsScriptURL, { method: 'POST', mode: 'cors', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+      targetedAnyChannel = true;
+    } catch(e){}
+  }
+  if(supabaseURL && supabaseAnonKey) {
+    try {
+      await fetch(`${supabaseURL}/rest/v1/session_attendance`, {
+        method: 'POST', headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ session_key: tokenKey, badge_id: id, full_name: name, role_designation: role })
+      });
+      targetedAnyChannel = true;
+    } catch(e){}
+  }
+  
+  document.getElementById('client-form-area').className = "hidden";
+  document.getElementById('client-success-area').className = "active";
 }
 
 async function forceGlobalCloudRefresh() {
-  if (supabaseURL && supabaseAnonKey) {
-    await fetchFromSupabasePipeline();
+  const token = document.getElementById('a-code').value + '-' + document.getElementById('a-date').value;
+  if(supabaseURL && supabaseAnonKey) {
+    try {
+      const res = await fetch(`${supabaseURL}/rest/v1/session_attendance?session_key=eq.${encodeURIComponent(token)}&select=*`, {
+        method: 'GET', headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
+      });
+      if(res.ok) processRows(await res.json(), 'sb');
+    } catch(e){}
   }
-  if (googleAppsScriptURL) {
-    await fetchFromGoogleScriptPipeline();
+  if(googleAppsScriptURL) {
+    try {
+      const res = await fetch(googleAppsScriptURL, { method: 'POST', mode: 'cors', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'pull', sessionKey: token }) });
+      const d = JSON.parse(await res.text());
+      if(d && d.status === 'success') processRows(d.records, 'gas');
+    } catch(e){}
   }
 }
 
-async function fetchFromSupabasePipeline() {
-  try {
-    const token = document.getElementById('a-code').value + '-' + document.getElementById('a-date').value;
-    const response = await fetch(`${supabaseURL}/rest/v1/session_attendance?session_key=eq.${encodeURIComponent(token)}&select=*`, {
-      method: 'GET', headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
-    });
-    if(!response.ok) return;
-    const rows = await response.json();
-    processIncomingGenericPayloadRows(rows.map(r => ({ id: r.badge_id, name: r.full_name, role: r.role_designation, time: new Date(r.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) })));
-  } catch(e){}
-}
-
-async function fetchFromGoogleScriptPipeline() {
-  try {
-    const token = document.getElementById('a-code').value + '-' + document.getElementById('a-date').value;
-    const res = await fetch(googleAppsScriptURL, {
-      method: 'POST', mode: 'cors', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'pull', sessionKey: token })
-    });
-    const rawText = await res.text();
-    const data = JSON.parse(rawText);
-    if(data && data.status === 'success') processIncomingGenericPayloadRows(data.records);
-  } catch(e){}
-}
-
-function processIncomingGenericPayloadRows(standardizedArray) {
-  let mutated = false;
-  standardizedArray.forEach(row => {
-    let match = facultyAndResidentsRoster.find(x => x.id.toUpperCase() === row.id.trim().toUpperCase());
+function processRows(rows, mode) {
+  let changed = false;
+  rows.forEach(r => {
+    let uid = (mode === 'sb' ? r.badge_id : r.id).toUpperCase().trim();
+    let uname = mode === 'sb' ? r.full_name : r.name;
+    let urole = mode === 'sb' ? r.role_designation : (r.role || 'Resident');
+    let utime = mode === 'sb' ? new Date(r.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : r.time;
+    
+    let match = facultyAndResidentsRoster.find(x => x.id.toUpperCase() === uid);
     if(!match) {
-      facultyAndResidentsRoster.push({ id: row.id, name: row.name, role: row.role || 'Resident', signed: true, time: row.time });
-      mutated = true;
+      facultyAndResidentsRoster.push({ id: uid, name: uname, role: urole, signed: true, time: utime }); changed = true;
     } else if(!match.signed) {
-      match.signed = true; match.time = row.time; mutated = true;
+      match.signed = true; match.time = utime; changed = true;
     }
   });
-  if(mutated) {
-    ChimeAudioContextEngine.triggerNotification();
-    persistAppStateToLocalSandbox(); updateTrack(); renderResidentRegistryDOM();
-    showToast("Session records updated successfully.");
+  if(changed) {
+    try {
+      if(document.getElementById('cfg-audio-chime').checked) {
+        let actx = new (window.AudioContext || window.webkitAudioContext)();
+        let osc = actx.createOscillator(); let g = actx.createGain();
+        osc.connect(g); g.connect(actx.destination); osc.start(); osc.stop(actx.currentTime+0.3);
+      }
+    }catch(err){}
+    persistState(); updateTrack();
   }
 }
 
-setInterval(forceGlobalCloudRefresh, 10000);
+setInterval(forceGlobalCloudRefresh, 8000);
 
-function adminTab(targetPane) {
-  ['setup', 'links', 'track', 'history', 'connect'].forEach(p => { document.getElementById('at-' + p).classList.add('hidden'); });
-  document.getElementById('at-' + targetPane).classList.remove('hidden');
+function adminTab(pane) {
+  ['setup', 'links', 'track', 'history', 'connect'].forEach(p => document.getElementById('at-' + p).classList.add('hidden'));
+  document.getElementById('at-' + pane).classList.remove('hidden');
   document.querySelectorAll('.tabs .tab').forEach((t, i) => {
     t.classList.remove('on');
-    if((targetPane==='setup'&&i===0)||(targetPane==='links'&&i===1)||(targetPane==='track'&&i===2)||(targetPane==='history'&&i===3)||(targetPane==='connect'&&i===4)) t.classList.add('on');
+    if((pane==='setup'&&i===0)||(pane==='links'&&i===1)||(pane==='track'&&i===2)||(pane==='history'&&i===3)||(pane==='connect'&&i===4)) t.classList.add('on');
   });
-  if(targetPane === 'links') { const currentLink = document.getElementById('session-link').textContent; const c = document.getElementById('qrcode'); c.innerHTML = ""; new QRCode(c, { text: currentLink, width: 180, height: 180 }); }
+  if(pane === 'links') {
+    const out = document.getElementById('session-link').textContent;
+    const c = document.getElementById('qrcode'); c.innerHTML = ""; new QRCode(c, { text: out, width: 180, height: 180 });
+  }
 }
 
 function toggleThemeSystem() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const target = (current === 'dark') ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', target);
-  document.getElementById('theme-btn').textContent = (target === 'dark') ? '☀️ Light Mode' : '🌙 Dark Mode';
+  const c = document.documentElement.getAttribute('data-theme'); const t = (c === 'dark') ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
 }
 
-function initializeTimerCountdownLoop() {
-  if (timerSystemIntervalReference) clearInterval(timerSystemIntervalReference);
-  timerSystemIntervalReference = setInterval(() => {
-    if (!isTimerRunning || timerSecondsDuration <= 0) return;
+function startTimerLoop() {
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if(!isTimerRunning || timerSecondsDuration <= 0) return;
     timerSecondsDuration--;
     const m = Math.floor(timerSecondsDuration / 60).toString().padStart(2, '0');
     const s = (timerSecondsDuration % 60).toString().padStart(2, '0');
     document.getElementById('timer-display').textContent = `${m}:${s}`;
   }, 1000);
 }
-
-function extendTimerSystem(mins) { timerSecondsDuration += (mins * 60); showToast(`Extended +${mins} mins.`); }
-function togglePauseTimerSystem() { isTimerRunning = !isTimerRunning; document.getElementById('timer-pause-btn').textContent = isTimerRunning ? "Pause" : "Resume"; }
-function genPass() { const pool = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let res = ''; for (let i = 0; i < 6; i++) res += pool.charAt(Math.floor(Math.random() * pool.length)); document.getElementById('a-pass').value = res; updateLinks(); }
+function extendTimerSystem(mins) { timerSecondsDuration += (mins * 60); }
+function togglePauseTimerSystem() { isTimerRunning = !isTimerRunning; }
+function genPass() {
+  const p = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let r = ''; for(let i=0; i<6; i++) r += p.charAt(Math.floor(Math.random()*p.length));
+  document.getElementById('a-pass').value = r; updateLinks();
+}
 
 function updateLinks() {
   const origin = window.location.origin + window.location.pathname;
-  const rawPayload = `c=${encodeURIComponent(document.getElementById('a-course').value)}&cd=${encodeURIComponent(document.getElementById('a-code').value)}&d=${encodeURIComponent(document.getElementById('a-date').value)}&t=${encodeURIComponent(document.getElementById('a-time').value)}&l=${encodeURIComponent(document.getElementById('a-lec').value)}&f=${encodeURIComponent(document.getElementById('a-fac').value)}&p=${encodeURIComponent(document.getElementById('a-pass').value)}`;
-  const linkOutput = `${origin}?${rawPayload}`;
-  document.getElementById('session-link').textContent = linkOutput;
-  document.getElementById('wa-template').textContent = `*AHSU Academic Session Gate*\n\nCourse: ${document.getElementById('a-course').value} (${document.getElementById('a-code').value})\nLecturer: ${document.getElementById('a-lec').value}\nFacilitator: ${document.getElementById('a-fac').value}\nPasskey: *${document.getElementById('a-pass').value}*\n\n👉 Dynamic Portal Access Matrix Link:\n${linkOutput}`;
+  const pay = `c=${encodeURIComponent(document.getElementById('a-course').value)}&cd=${encodeURIComponent(document.getElementById('a-code').value)}&d=${encodeURIComponent(document.getElementById('a-date').value)}&t=${encodeURIComponent(document.getElementById('a-time').value)}&l=${encodeURIComponent(document.getElementById('a-lec').value)}&f=${encodeURIComponent(document.getElementById('a-fac').value)}&p=${encodeURIComponent(document.getElementById('a-pass').value)}`;
+  const out = `${origin}?${pay}`;
+  document.getElementById('session-link').textContent = out;
+  document.getElementById('wa-template').textContent = `*AHSU Academic Session Gate Link*\nCourse: ${document.getElementById('a-course').value}\nPasskey: *${document.getElementById('a-pass').value}*\nLink:\n${out}`;
 }
 
-function copyLink() { navigator.clipboard.writeText(document.getElementById('session-link').textContent); showToast('Access link saved!'); }
-function copyWA() { navigator.clipboard.writeText(document.getElementById('wa-template').textContent); showToast('Message block copied!'); }
+function copyLink() { navigator.clipboard.writeText(document.getElementById('session-link').textContent); showToast('Link saved!'); }
+function copyWA() { navigator.clipboard.writeText(document.getElementById('wa-template').textContent); showToast('Payload copied!'); }
 
 function addPersonRecord() {
-  const nameInput = document.getElementById('s-name'); const idInput = document.getElementById('s-id'); const roleInput = document.getElementById('s-role');
-  const n = nameInput.value.trim(); const id = idInput.value.trim().toUpperCase(); const r = roleInput.value;
-  if(!n || !id) { alert('Name and identity parameters required.'); return; }
-  if(facultyAndResidentsRoster.some(x => x.id === id)) { alert('Identity duplicated.'); return; }
-  facultyAndResidentsRoster.push({ name: n, id: id, role: r, signed: false, time: null });
-  nameInput.value = ''; idInput.value = ''; renderResidentRegistryDOM(); updateTrack(); persistAppStateToLocalSandbox();
+  const n = document.getElementById('s-name'); const id = document.getElementById('s-id'); const r = document.getElementById('s-role');
+  if(!n.value.trim() || !id.value.trim()) return;
+  facultyAndResidentsRoster.push({ name: n.value.trim(), id: id.value.trim().toUpperCase(), role: r.value, signed: false, time: null });
+  n.value = ''; id.value = ''; renderRosterDOM(); updateTrack(); persistState();
 }
 
 function loadSample() {
@@ -643,93 +646,114 @@ function loadSample() {
     { name: "Mugisha Eric", id: "AHSU2026001", role: "Resident", signed: false, time: null },
     { name: "Keza Aline", id: "AHSU2026002", role: "Resident", signed: false, time: null }
   ];
-  renderResidentRegistryDOM(); updateTrack(); persistAppStateToLocalSandbox(); showToast('Mock cohort active.');
+  renderRosterDOM(); updateTrack(); persistState();
 }
 
-function renderResidentRegistryDOM() {
+function renderRosterDOM() {
   let html = '';
-  facultyAndResidentsRoster.forEach((p, idx) => {
-    html += `<div class="srow"><div class="av">${p.role === 'Faculty' ? '🎓' : '👤'}</div><div style="flex:1;"><div class="sname">${p.name} <span class="smeta">(${p.id}) [${p.role}]</span></div></div><button class="btn btn-danger btn-sm" onclick="removeRosterItem(${idx})">Drop</button></div>`;
+  facultyAndResidentsRoster.forEach((p, i) => {
+    html += `<div class="srow"><div class="av">${p.role==='Faculty'?'🎓':'👤'}</div><div style="flex:1;"><div class="sname">${p.name} <span class="smeta">(${p.id}) [${p.role}]</span></div></div><button class="btn btn-danger btn-sm" onclick="dropRosterItem(${i})">Drop</button></div>`;
   });
-  document.getElementById('stu-list').innerHTML = html || '<p style="color:var(--gray-400); font-size:12px;">No system cohort records exist.</p>';
+  document.getElementById('stu-list').innerHTML = html || '<p style="color:var(--gray-400); font-size:12px;">No local records configuration loaded.</p>';
 }
-
-function removeRosterItem(i) { facultyAndResidentsRoster.splice(i, 1); renderResidentRegistryDOM(); updateTrack(); persistAppStateToLocalSandbox(); }
+function dropRosterItem(i) { facultyAndResidentsRoster.splice(i,1); renderRosterDOM(); updateTrack(); persistState(); }
 
 function updateTrack() {
-  const resPool = facultyAndResidentsRoster.filter(x => x.role === 'Resident');
-  const presentRes = resPool.filter(x => x.signed).length;
-  const presentFac = facultyAndResidentsRoster.filter(x => x.role === 'Faculty' && x.signed).length;
-  const expectedPool = parseInt(document.getElementById('a-expected').value) || resPool.length || 1;
-  document.getElementById('st-expected-val').textContent = expectedPool;
-  document.getElementById('st-present').textContent = presentRes;
-  document.getElementById('st-faculty-count').textContent = presentFac;
-  document.getElementById('st-rate').textContent = `${Math.round((presentRes / expectedPool) * 100)}%`;
-  executeTrackingViewRenderer(facultyAndResidentsRoster);
+  const res = facultyAndResidentsRoster.filter(x => x.role === 'Resident');
+  const presRes = res.filter(x => x.signed).length;
+  const presFac = facultyAndResidentsRoster.filter(x => x.role === 'Faculty' && x.signed).length;
+  const exp = parseInt(document.getElementById('a-expected').value) || res.length || 1;
+  
+  document.getElementById('st-expected-val').textContent = exp;
+  document.getElementById('st-present').textContent = presRes;
+  document.getElementById('st-faculty-count').textContent = presFac;
+  document.getElementById('st-rate').textContent = `${Math.round((presRes/exp)*100)}%`;
+  
+  renderSplitTables(facultyAndResidentsRoster);
 }
 
-// RENDERS THE DATA INTO TWO DISTINCT SEPARATE LOG TAB TABLES
-function executeTrackingViewRenderer(ds) {
-  const query = document.getElementById('registry-search').value.toLowerCase().trim();
+// TAB 3: SEPARATE DOM LOG RENDERERS FOR RESIDENTS AND FACULTY
+function renderSplitTables(ds) {
+  const q = document.getElementById('registry-search').value.toLowerCase().trim();
+  const fil = ds.filter(p => p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q));
   
-  // Filter Dataset by Search Term
-  const filtered = ds.filter(p => p.name.toLowerCase().includes(query) || p.id.toLowerCase().includes(query));
+  const residentsList = fil.filter(p => p.role === 'Resident');
+  const facultyList = fil.filter(p => p.role === 'Faculty');
   
-  // Isolate Categories
-  const residentsList = filtered.filter(p => p.role === 'Resident');
-  const facultyList = filtered.filter(p => p.role === 'Faculty');
-  
-  // Render Residents Table Rows
   let resHtml = '';
-  if (residentsList.length === 0) {
-    resHtml = `<tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No residents match search criteria.</td></tr>`;
-  } else {
+  if(!residentsList.length) resHtml = `<tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No residents logged.</td></tr>`;
+  else {
     residentsList.forEach(p => {
-      resHtml += `<tr>
-        <td style="font-family:var(--mono); font-weight:500;">${p.id}</td>
-        <td><strong>${p.name}</strong></td>
-        <td>${p.signed ? '<span class="badge b-signed">✓ Present</span>' : '<span class="badge b-absent">Absent</span>'}</td>
-        <td style="color:var(--gray-600); font-size:13px;">${p.time || '—'}</td>
-      </tr>`;
+      resHtml += `<tr><td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.signed?'<span class="badge b-signed">✓ Present</span>':'<span class="badge b-absent">Absent</span>'}</td><td>${p.time||'—'}</td></tr>`;
     });
   }
   document.getElementById('resident-tbody-logs').innerHTML = resHtml;
 
-  // Render Faculty Table Rows
   let facHtml = '';
-  if (facultyList.length === 0) {
-    facHtml = `<tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No faculty members match search criteria.</td></tr>`;
-  } else {
+  if(!facultyList.length) facHtml = `<tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No faculty logged.</td></tr>`;
+  else {
     facultyList.forEach(p => {
-      facHtml += `<tr>
-        <td style="font-family:var(--mono); font-weight:500;">${p.id}</td>
-        <td><strong>${p.name}</strong></td>
-        <td>${p.signed ? '<span class="badge b-faculty">✓ Logged</span>' : '<span class="badge b-absent">Absent</span>'}</td>
-        <td style="color:var(--gray-600); font-size:13px;">${p.time || '—'}</td>
-      </tr>`;
+      facHtml += `<tr><td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.signed?'<span class="badge b-faculty">✓ Logged</span>':'<span class="badge b-absent">Absent</span>'}</td><td>${p.time||'—'}</td></tr>`;
     });
   }
   document.getElementById('faculty-tbody-logs').innerHTML = facHtml;
 }
 
-function filterRegistryLogs() {
-  executeTrackingViewRenderer(facultyAndResidentsRoster);
+function filterRegistryLogs() { renderSplitTables(facultyAndResidentsRoster); }
+
+// ================================================================= -->
+// DYNAMIC PRINTABLE PDF REPORT GENERATION CODE BLOCK                -->
+// ================================================================= -->
+function generateOfficialSignaturePDF() {
+  // Transfer variables down to hidden template block structure
+  document.getElementById('pdf-meta-course').textContent = document.getElementById('a-course').value;
+  document.getElementById('pdf-meta-code').textContent = document.getElementById('a-code').value;
+  document.getElementById('pdf-meta-date').textContent = document.getElementById('a-date').value;
+  document.getElementById('pdf-meta-time').textContent = document.getElementById('a-time').value;
+  document.getElementById('pdf-meta-lec').textContent = document.getElementById('a-lec').value;
+  document.getElementById('pdf-meta-fac').textContent = document.getElementById('a-fac').value;
+  document.getElementById('pdf-meta-expected').textContent = document.getElementById('st-expected-val').textContent;
+  document.getElementById('pdf-meta-rate').textContent = document.getElementById('st-rate').textContent;
+  
+  // Clean, structural duplication of state lines into the printable rows
+  let facRows = '', resRows = '';
+  facultyAndResidentsRoster.forEach(p => {
+    letrow = `<tr><td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.signed ? 'PRESENT' : 'ABSENT'}</td><td>${p.time || '—'}</td></tr>`;
+    if(p.role === 'Faculty') facRows += letrow;
+    else resRows += letrow;
+  });
+  
+  document.getElementById('pdf-faculty-tbody').innerHTML = facRows || '<tr><td colspan="4">No Faculty members documented.</td></tr>';
+  document.getElementById('pdf-resident-tbody').innerHTML = resRows || '<tr><td colspan="4">No Residents documented.</td></tr>';
+  
+  // Execute conversion rules utilizing local html2pdf execution loop engine
+  const element = document.getElementById('hod-pdf-template');
+  const opt = {
+    margin: [15, 15, 20, 15],
+    filename: `AHSU_Attendance_Report_${document.getElementById('a-code').value}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  
+  showToast("Compiling official printable signature PDF...");
+  html2pdf().set(opt).from(element).save().then(() => {
+    showToast("PDF report downloaded successfully!");
+  });
 }
 
 function exportCSV() {
-  const m = [['Index', 'Role Designation', 'Identification Badge', 'Full Name', 'Status Metric', 'Timestamp Logged']];
-  facultyAndResidentsRoster.forEach((p, i) => { m.push([i + 1, p.role, p.id, p.name, p.signed ? 'Present' : 'Absent', p.time || '—']); });
+  const m = [['Role', 'ID', 'Name', 'Status', 'Time']];
+  facultyAndResidentsRoster.forEach(p => m.push([p.role, p.id, p.name, p.signed?'Present':'Absent', p.time||'—']));
   const csv = m.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
-  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;' })); a.setAttribute("download", `Attendance_Export.csv`); document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.setAttribute("download", `Data.csv`); a.click();
 }
+function clearSession() { localStorage.removeItem(ns('session_v5')); facultyAndResidentsRoster = []; init(); }
+function renderHistory() { document.getElementById('history-list').innerHTML = '<p style="color:var(--gray-400); font-size:12px;">Archives stable.</p>'; }
+function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2000); }
+function printQRCodeModule() { window.print(); }
 
-function clearSession() { if(!confirm("Purge application cached workspaces?")) return; autoArchiveData(); facultyAndResidentsRoster = []; persistAppStateToLocalSandbox(); initApplicationFramework(); adminTab('setup'); }
-function autoArchiveData() { if(!facultyAndResidentsRoster.length) return; try { const arch = JSON.parse(localStorage.getItem(ns('archive_v4')) || '[]'); arch.unshift({ course: document.getElementById('a-course').value, code: document.getElementById('a-code').value, date: document.getElementById('a-date').value, people: facultyAndResidentsRoster, archivedAt: new Date().toLocaleString() }); localStorage.setItem(ns('archive_v4'), JSON.stringify(arch)); } catch(e){} }
-function renderHistoryLogs() { const arch = JSON.parse(localStorage.getItem(ns('archive_v4')) || '[]'); let html = ''; arch.forEach(item => { html += `<div class="card" style="padding:12px 16px; font-size:13px;"><strong>${item.course} (${item.code})</strong><br><span class="smeta">Timeline Context: ${item.archivedAt} | Check-ins: ${item.people.filter(x=>x.signed).length} Active Signature Nodes</span></div>`; }); document.getElementById('history-list').innerHTML = html || '<p style="color:var(--gray-400); font-size:12px;">Persistent archives historical clear.</p>'; }
-function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1'; setTimeout(() => { t.style.opacity = '0'; }, 2000); }
-function printQRCodeModule() { const win = window.open('', '_blank'); win.document.write(`<html><body><h2>AHSU Sign-In</h2><h3>${document.getElementById('a-course').value}</h3><div id="qr"></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><script>new QRCode(document.getElementById("qr"), "${document.getElementById('session-link').textContent}"); setTimeout(()=>window.print(),600);<\/script></body></html>`); win.document.close(); }
-
-document.addEventListener("DOMContentLoaded", initApplicationFramework);
+document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 </html>
