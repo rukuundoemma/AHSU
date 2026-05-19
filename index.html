@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#1B4F8A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>AHSU Attendance System - Professional Dashboard</title>
+<title>AHSU Attendance System - Advanced Signature Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --blue:#1B4F8A; --blue-d:#0F3460; --blue-l:#2D6FBB; --blue-pale:#EBF2FB; --blue-border:#C2D9F0;
@@ -68,21 +68,17 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
 .code-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--gray-600);word-break:break-all;margin:8px 0;}
 .wa-box{background:var(--gray-50);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:12px;font-size:13px;font-family:var(--mono);color:var(--gray-600);white-space:pre-wrap;margin:8px 0;}
 .log-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
-.log-table th, .log-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+.log-table th, .log-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
 .log-table th { background: var(--gray-100); font-weight: 600; color: var(--gray-600); font-size: 11px; text-transform: uppercase; }
+.sig-canvas-container { border: 2px dashed var(--blue-border); background: #ffffff; border-radius: var(--r-sm); position: relative; margin-top: 6px; }
+.sig-canvas { width: 100%; height: 140px; display: block; cursor: crosshair; touch-action: none; }
+.sig-render-img { max-height: 45px; max-width: 140px; border: 1px solid var(--border-color); background: #fff; padding: 2px; border-radius: 4px; display: block; }
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gray-900);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;opacity:0;transition:opacity .25s;}
 .hidden{display:none!important;}
 .timer-container { display: flex; align-items: center; justify-content: space-between; background: var(--gray-100); padding: 12px 18px; border-radius: var(--r-sm); margin-top: 10px; }
 .timer-clock { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--blue); }
 .qr-modal-wrapper { display: grid; grid-template-columns: 200px 1fr; gap: 20px; align-items: center; }
 #qrcode { background: #fff; padding: 10px; border-radius: 6px; display: inline-block; border: 1px solid var(--gray-200); width: 200px; height: 200px; }
-
-/* Structural CSS specifically styled for the PDF compiler generation */
-.pdf-only { display: none; }
-.pdf-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-.pdf-table th, .pdf-table td { border: 1px solid #000000; padding: 6px 10px; text-align: left; font-size: 11px; }
-.pdf-table th { background-color: #f2f2f2; font-weight: bold; text-transform: uppercase; }
-
 @media(max-width:768px){ .g2,.g3,.qr-modal-wrapper{grid-template-columns:1fr;} .sg{grid-template-columns:1fr 1fr;} .wrap{padding:14px 14px 60px;} }
 </style>
 </head>
@@ -92,7 +88,7 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
   <div class="topbar">
     <div class="tb-brand">
       <div class="tb-logo">AHSU</div>
-      <div><div class="tb-title">Attendance System</div><div class="tb-sub">Admin Dashboard Hub</div></div>
+      <div><div class="tb-title">Attendance System</div><div class="tb-sub">Admin Engine</div></div>
     </div>
     <div style="display:flex; gap:12px; align-items:center;">
       <label class="toggle-control" style="color:#fff; margin:0;"><input type="checkbox" id="cfg-audio-chime" checked style="width:auto;"> 🔔 Chime</label>
@@ -103,34 +99,30 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
 
   <div class="wrap">
     <div class="tabs">
-      <button class="tab on"  onclick="adminTab('setup')">1 · Setup Configuration</button>
-      <button class="tab"     onclick="adminTab('links')">2 · Link &amp; QR Entry</button>
+      <button class="tab on"  onclick="adminTab('setup')">1 · Setup</button>
+      <button class="tab"     onclick="adminTab('links')">2 · Links &amp; QR Access</button>
       <button class="tab"     onclick="adminTab('track')">3 · Tracking &amp; Analytics</button>
       <button class="tab"     onclick="adminTab('history')">4 · Archives</button>
-      <button class="tab"     onclick="adminTab('connect')" id="sheets-gear-btn">⚙ Cloud Sync Hub</button>
+      <button class="tab"     onclick="adminTab('connect')" id="sheets-gear-btn">⚙ Cloud Supabase Hub</button>
     </div>
 
     <div id="at-setup">
       <div class="card">
-        <div class="card-title">Academic Session Meta Details</div>
+        <div class="card-title">Session Metadata Parameters</div>
         <div class="g2">
-          <div><label>Course Name / Module</label><input type="text" id="a-course" value="Obstetrics anesthesia" oninput="updateLinks()"></div>
-          <div><label>Course Code / Semester</label><input type="text" id="a-code" value="SEM4" oninput="updateLinks()"></div>
+          <div><label>Course Name</label><input type="text" id="a-course" value="Introduction to Public Health" oninput="updateLinks()"></div>
+          <div><label>Course Code</label><input type="text" id="a-code" value="IPH 101" oninput="updateLinks()"></div>
         </div>
         <div class="g3">
-          <div><label>Session Date</label><input type="date" id="a-date" oninput="updateLinks()"></div>
-          <div><label>Scheduled Start Time</label><input type="time" id="a-time" value="08:00" oninput="updateLinks()"></div>
-          <div><label>Expected Target Pool</label><input type="number" id="a-expected" value="21" min="1" oninput="updateTrack()"></div>
+          <div><label>Date</label><input type="date" id="a-date" oninput="updateLinks()"></div>
+          <div><label>Time</label><input type="time" id="a-time" value="09:00" oninput="updateLinks()"></div>
+          <div><label>Expected Target Pool</label><input type="number" id="a-expected" value="25" min="1" oninput="updateTrack()"></div>
         </div>
         <div class="g2">
-          <div><label>Primary Lecturer</label><input type="text" id="a-lec" value="Dr Niyotwiringira" oninput="updateLinks()"></div>
-          <div><label>Session Facilitator</label><input type="text" id="a-fac" value="Dr Sandrine Gbia" oninput="updateLinks()"></div>
+          <div><label>Presenter / Lecturer</label><input type="text" id="a-lec" value="Dr. Uwimana" oninput="updateLinks()"></div>
+          <div><label>Session Security Passkey</label><input type="text" id="a-pass" style="font-family:var(--mono);" oninput="updateLinks()"></div>
         </div>
-        <label>Session Sign-In Passkey</label>
-        <div style="display:flex;gap:8px;margin-top:5px;">
-          <input type="text" id="a-pass" placeholder="e.g. OBS48A" style="flex:1;font-family:var(--mono);" oninput="updateLinks()">
-          <button class="btn btn-outline" onclick="genPass()">Generate Token</button>
-        </div>
+        <div class="btns" style="margin-top:10px;"><button class="btn btn-outline btn-sm" onclick="genPass()">Generate Token</button></div>
         <div class="timer-container">
           <div class="timer-clock" id="timer-display">30:00</div>
           <div style="display:flex; gap:6px;">
@@ -142,10 +134,10 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
       </div>
 
       <div class="card">
-        <div class="card-title">Roster Enrollment Configuration</div>
+        <div class="card-title">Roster Initialization Setup</div>
         <div class="g3">
           <div><label>Full Official Name</label><input type="text" id="s-name" placeholder="John Doe"></div>
-          <div><label>Identification / Badge Number</label><input type="text" id="s-id" placeholder="MM-OB-2024-XXX"></div>
+          <div><label>Identification/Badge ID</label><input type="text" id="s-id" placeholder="AHSU2026001"></div>
           <div>
             <label>Designation Role</label>
             <select id="s-role">
@@ -155,8 +147,8 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
           </div>
         </div>
         <div class="btns">
-          <button class="btn btn-primary" onclick="addPersonRecord()">+ Commit Member To Roster</button>
-          <button class="btn btn-outline" onclick="loadSample()">Load Sample Mixed Cohort</button>
+          <button class="btn btn-primary" onclick="addPersonRecord()">+ Commit Member</button>
+          <button class="btn btn-outline" onclick="loadSample()">Load Cohort Class Sample</button>
         </div>
         <div id="stu-list" style="margin-top:14px;"></div>
       </div>
@@ -169,7 +161,7 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
           <div id="qrcode"></div>
           <div>
             <h4 style="margin-bottom:6px; font-size:16px;">Live Visual Entry Portal (QR)</h4>
-            <p style="font-size:13px; color:var(--gray-600); margin-bottom:12px;">Display this framework on screen. Residents and Faculty scan to reach the digital signature entry dashboard instantly.</p>
+            <p style="font-size:13px; color:var(--gray-600); margin-bottom:12px;">Display this pattern. Attendees scan with mobile device cameras to reach their secure hand-drawn signature log layout directly.</p>
             <button class="btn btn-outline btn-sm" onclick="printQRCodeModule()">🖨 Print QR Form Factor</button>
           </div>
         </div>
@@ -181,38 +173,31 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
       </div>
       <div class="card">
         <div class="card-title">WhatsApp Structured Dispatch Payload</div>
-        <div class="wa-box" id="wa-template">Loading variables...</div>
+        <div class="wa-box" id="wa-template">Awaiting variables...</div>
         <div class="btns"><button class="btn btn-outline" onclick="copyWA()">Copy Layout Block</button></div>
       </div>
     </div>
 
     <div id="at-track" class="hidden">
       <div class="conn-bar" style="background:var(--blue-pale); border:1px solid var(--blue-border); display:flex; align-items:center; gap:10px; padding:10px; border-radius:6px; margin-bottom:16px;">
-        <span style="font-size:13px;" id="cloud-sync-status-msg">🔄 Standalone Local Buffer active. Real-time logging loop streaming operational metrics.</span>
-        <button class="btn btn-outline btn-sm" onclick="refreshFromSheets()" style="margin-left:auto;">Force Sync Refresh</button>
+        <span style="font-size:13px;" id="cloud-sync-status-msg">🔄 Supabase Database Gateway Monitoring Loop Active...</span>
+        <button class="btn btn-outline btn-sm" onclick="refreshFromSupabase()" style="margin-left:auto;">Force Sync Refresh</button>
       </div>
 
       <div class="sg">
         <div class="sc"><div class="sn" id="st-expected-val">0</div><div class="sl">Expected Residents</div></div>
         <div class="sc"><div class="sn" style="color:var(--green);" id="st-present">0</div><div class="sl">Residents Present</div></div>
-        <div class="sc"><div class="sn" style="color:var(--purple);" id="st-faculty-count">0</div><div class="sl">Faculty Verified</div></div>
+        <div class="sc"><div class="sn" style="color:var(--purple);" id="st-faculty-count">0</div><div class="sl">Faculty Logged</div></div>
         <div class="sc"><div class="sn" style="color:var(--blue);" id="st-rate">0%</div><div class="sl">Resident Core Rate</div></div>
       </div>
 
-      <div class="card" style="padding:14px 20px; margin-bottom:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-          <input type="text" id="registry-search" placeholder="Filter active streams by registry name..." oninput="filterRegistryLogs()" style="flex:1; max-width:400px;">
-          <div style="display:flex; gap:8px;">
-            <button class="btn btn-outline btn-sm" onclick="exportCSV()">Export CSV</button>
-            <button class="btn btn-primary btn-sm" onclick="generateOfficialHoDSignOffPDF()" style="background:#0F3460; border-color:#0F3460;">📄 Download HoD Sign-Off PDF</button>
-          </div>
-        </div>
-      </div>
-
       <div class="card">
-        <div class="card-title" style="color:var(--green); font-weight:600;">📊 Cohort Residents Registry Stream</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:12px; flex-wrap:wrap;">
+          <div class="card-title" style="color:var(--green); font-weight:600; margin:0;">📊 Cohort Residents Registry Stream</div>
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">Export CSV</button>
+        </div>
         <table class="log-table">
-          <thead><tr><th>Student ID</th><th>Full Name</th><th>Status</th><th>Sign-In Time</th></tr></thead>
+          <thead><tr><th style="width:25%;">Student ID</th><th style="width:30%;">Full Name</th><th style="width:15%;">Status</th><th style="width:15%;">Hand-Drawn Signature</th><th style="width:15%;">Sign-In Time</th></tr></thead>
           <tbody id="resident-tbody-logs"></tbody>
         </table>
       </div>
@@ -220,7 +205,7 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
       <div class="card">
         <div class="card-title" style="color:var(--purple); font-weight:600;">🎓 Attending Faculty Registry Stream</div>
         <table class="log-table">
-          <thead><tr><th>Faculty ID</th><th>Full Name</th><th>Status</th><th>Sign-In Time</th></tr></thead>
+          <thead><tr><th style="width:40%;">Full Name</th><th style="width:30%;">Hand-Drawn Signature</th><th style="width:30%;">Sign-In Time</th></tr></thead>
           <tbody id="faculty-tbody-logs"></tbody>
         </table>
       </div>
@@ -232,9 +217,11 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
 
     <div id="at-connect" class="hidden">
       <div class="card">
-        <div class="card-title">Google Sheets Integration Pipeline</div>
-        <input type="url" id="sheets-url" placeholder="https://script.google.com/macros/s/.../exec" style="font-family:var(--mono); font-size:12px; margin-bottom:12px;">
-        <button class="btn btn-primary" onclick="saveSheetsConfigurationLink()">Secure Cloud Link Route</button>
+        <div class="card-title">Supabase Database Integration Pipeline</div>
+        <p style="font-size:13px; margin-bottom:8px;">Map cloud endpoints here to handle persistent real-time registration sync operations:</p>
+        <div><label>Supabase Project URL</label><input type="url" id="sb-url" placeholder="https://your-project.supabase.co" style="font-family:var(--mono);"></div>
+        <div><label>Supabase Public Anon Key Key</label><input type="text" id="sb-key" placeholder="eyJhbGciOi..." style="font-family:var(--mono);"></div>
+        <button class="btn btn-primary" onclick="saveSupabaseConfiguration()" style="margin-top:14px;">Link Database Ecosystem</button>
       </div>
     </div>
   </div>
@@ -244,88 +231,35 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
   <div class="card" style="max-width:480px; margin:0 auto; box-shadow:0 12px 40px rgba(0,0,0,0.15);">
     <div style="text-align:center; margin-bottom:20px;">
       <div style="width:52px; height:52px; background:var(--blue); color:#fff; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; font-size:20px; margin-bottom:10px;">A</div>
-      <h3 id="cli-header-title" style="font-size:18px;">AHSU Attendance Gate</h3>
+      <h3 id="cli-header-title" style="font-size:18px;">AHSU Register Intake</h3>
       <p id="cli-header-subtitle" style="font-size:13px; color:var(--gray-600);"></p>
     </div>
     <div id="client-form-area">
-      <div><label>Full Official Name</label><input type="text" id="cli-name" placeholder="Firstname Lastname"></div>
-      <div><label>Identification Code / Badge ID</label><input type="text" id="cli-id" placeholder="MM-OB-2024-001" style="font-family:var(--mono); text-transform:uppercase;"></div>
       <div>
         <label>Your Roster Designation Role</label>
-        <select id="cli-role">
+        <select id="cli-role" onchange="adjustClientFieldsVisibility()">
           <option value="Resident">Resident</option>
           <option value="Faculty">Faculty Member</option>
         </select>
       </div>
-      <div><label>Session Security Passkey Token</label><input type="text" id="cli-pass" placeholder="Enter Token" style="font-family:var(--mono); text-transform:uppercase;"></div>
+      <div><label>Full Official Name</label><input type="text" id="cli-name" placeholder="Firstname Lastname"></div>
+      <div id="cli-id-row"><label>Identification Code / Student ID</label><input type="text" id="cli-id" placeholder="AHSU2026001" style="font-family:var(--mono); text-transform:uppercase;"></div>
+      <div><label>Session Security Passkey Token</label><input type="text" id="cli-pass" placeholder="Enter Token Code" style="font-family:var(--mono); text-transform:uppercase;"></div>
+      
+      <div>
+        <label>Draw Signature Box (Finger, Stylus Pen, or Cursor)</label>
+        <div class="sig-canvas-container">
+          <canvas id="signature-canvas" class="sig-canvas"></canvas>
+        </div>
+        <div style="text-align:right; margin-top:4px;"><button class="btn btn-outline btn-sm" type="button" onclick="clearSignaturePadMatrix()">Clear Drawing Panel</button></div>
+      </div>
+
       <button class="btn btn-primary" onclick="submitClientSignature()" style="width:100%; justify-content:center; margin-top:20px; padding:12px; font-weight:600;">✍️ Confirm Secure Register Entry</button>
     </div>
     <div id="client-success-area" class="hidden" style="text-align:center; padding:20px 0;">
       <div style="font-size:46px; color:var(--green); margin-bottom:10px;">✓</div>
-      <h4 style="color:var(--green); margin-bottom:8px;">Sign-In Log Documented</h4>
-      <p style="font-size:13px; color:var(--gray-600);">Your structural telemetry node data payload has successfully synchronized with university analytics map registers.</p>
-    </div>
-  </div>
-</div>
-
-<div id="hod-pdf-template" class="pdf-only">
-  <div style="font-family:'Times New Roman', serif; padding:20px 30px; color:#111; background:#fff;">
-    <div style="text-align:center; border-bottom:3px double #1B4F8A; padding-bottom:10px; margin-bottom:20px;">
-      <h2 style="font-size:22pt; color:#1B4F8A; font-weight:bold; margin-bottom:2px; text-transform:uppercase; font-family:'Arial', sans-serif;">Africa Health Sciences University</h2>
-      <h3 style="font-size:13pt; font-weight:bold; color:#333; margin-bottom:5px;">Official Academic Session Attendance Register</h3>
-      <div style="font-size:10pt; color:#666; font-style:italic;">Verified Telemetry Document Hub &middot; https://ahsu.ac.rw/</div>
-    </div>
-    
-    <table style="width:100%; margin-bottom:25px; font-size:11pt; border-collapse:collapse;">
-      <tr>
-        <td style="padding:4px 0; width:55%;"><strong>Course Parameter / Module:</strong> <span id="pdf-meta-course" style="border-bottom:1px dashed #777;"></span></td>
-        <td style="padding:4px 0; width:45%;"><strong>Course Code / Semester:</strong> <span id="pdf-meta-code" style="border-bottom:1px dashed #777;"></span></td>
-      </tr>
-      <tr>
-        <td style="padding:4px 0;"><strong>Session Date Frame:</strong> <span id="pdf-meta-date" style="border-bottom:1px dashed #777;"></span></td>
-        <td style="padding:4px 0;"><strong>Scheduled Start Time:</strong> <span id="pdf-meta-time" style="border-bottom:1px dashed #777;"></span></td>
-      </tr>
-      <tr>
-        <td style="padding:4px 0;"><strong>Primary Lecturer:</strong> <span id="pdf-meta-lec" style="border-bottom:1px dashed #777;"></span></td>
-        <td style="padding:4px 0;"><strong>Session Facilitator:</strong> <span id="pdf-meta-fac" style="border-bottom:1px dashed #777;"></span></td>
-      </tr>
-      <tr>
-        <td style="padding:4px 0;"><strong>Expected Target Headcount:</strong> <span id="pdf-meta-expected" style="font-weight:bold;"></span></td>
-        <td style="padding:4px 0;"><strong>Calculated Core Validation Intake Rate:</strong> <span id="pdf-meta-rate" style="font-weight:bold; color:#1B4F8A;"></span></td>
-      </tr>
-    </table>
-
-    <h4 style="font-family:Arial, sans-serif; font-size:12pt; color:#1B4F8A; text-transform:uppercase; margin-top:20px; margin-bottom:6px; border-bottom:1px solid #1B4F8A; padding-bottom:3px;">Faculty Attendance Ledger Stream</h4>
-    <table class="pdf-table">
-      <thead><tr style="background:#f2f2f2;"><th style="width:8%;">#</th><th style="width:50%;">Full Name</th><th style="width:20%;">Status</th><th style="width:22%;">Sign-In Time</th></tr></thead>
-      <tbody id="pdf-faculty-tbody"></tbody>
-    </table>
-
-    <h4 style="font-family:Arial, sans-serif; font-size:12pt; color:#1B4F8A; text-transform:uppercase; margin-top:25px; margin-bottom:6px; border-bottom:1px solid #1B4F8A; padding-bottom:3px;">Student / Resident Attendance Ledger Stream</h4>
-    <table class="pdf-table">
-      <thead><tr style="background:#f2f2f2;"><th style="width:8%;">#</th><th style="width:32%;">Full Name</th><th style="width:20%;">Student ID</th><th style="width:18%;">Status</th><th style="width:22%;">Sign-In Time</th></tr></thead>
-      <tbody id="pdf-resident-tbody"></tbody>
-    </table>
-
-    <p style="font-size:9pt; color:#555; margin-top:30px; line-height:1.4; font-style:italic; border-left:3px solid #ccc; padding-left:10px;">
-      Digital Signature Verification: Each signature log was authenticated personally by the attendee via secure session password protocols. Timestamps are system-recorded directly through secure cloud endpoints.
-    </p>
-
-    <div style="margin-top:60px; width:100%;">
-      <table style="width:100%; border:none;">
-        <tr style="border:none;">
-          <td style="width:50%; vertical-align:top; border:none; padding:0;">
-            <div style="border-top:1px solid #000; width:85%; padding-top:5px; font-size:11pt; font-weight:bold;">System Registrar / Operator</div>
-            <div style="font-size:9pt; color:#666; margin-top:4px;">Signature: __________________________</div>
-            <div style="font-size:9pt; color:#666; margin-top:4px;">Date Frame: ____ / ____ / ________</div>
-          </td>
-          <td style="width:50%; vertical-align:top; border:none; padding:0;">
-            <div style="border-top:1px solid #000; width:85%; padding-top:5px; font-size:11pt; font-weight:bold;">Head of Department (HoD) Approval</div>
-            <div style="font-size:9pt; color:#666; margin-top:4px;">Signature: __________________________</div>
-            <div style="font-size:9pt; color:#666; margin-top:4px;">Date Frame: ____ / ____ / ________</div>
-          </td>
-        </tr>
-      </table>
+      <h4 style="color:var(--green); margin-bottom:8px;">Sign-In Log Authenticated</h4>
+      <p style="font-size:13px; color:var(--gray-600);">Your structural data metrics payload and verified handwriting log have synchronized successfully with university databases.</p>
     </div>
   </div>
 </div>
@@ -335,46 +269,146 @@ input[type=text],input[type=date],input[type=time],select,input[type=number]{
 <script>
 let DEPT = 'GEN';
 let membersRoster = [];
-let sheetsURL = localStorage.getItem('ahsu_GEN_sheets_url') || '';
+let supabaseUrl = localStorage.getItem('ahsu_sb_url') || '';
+let supabaseKey = localStorage.getItem('ahsu_sb_key') || '';
+let supabaseClient = null;
+
 let timerSecondsDuration = 1800;
 let isTimerRunning = true;
 let timerIntervalRef = null;
+
+// Drawing Matrix Tracking Coordinates
+let isDrawing = false;
+let sigCanvas = null;
+let sigCtx = null;
 
 function ns(k) { return 'ahsu_' + DEPT + '_' + k; }
 
 function init() {
   const params = new URLSearchParams(window.location.search);
-  // INTERRUPT ROUTER: Checks for parameter metrics strings to transition to user Sign-In mode
   if(params.has('c') && params.has('p')) {
     document.getElementById('pg-admin').className = "pg hidden";
     document.getElementById('pg-client').className = "pg active";
     document.getElementById('cli-header-title').textContent = params.get('c');
-    document.getElementById('cli-header-subtitle').innerHTML = `${params.get('cd')} &middot; Presented by ${params.get('l')}`;
+    document.getElementById('cli-header-subtitle').innerHTML = `${params.get('cd')} &middot; Managed by ${params.get('l')}`;
+    initSignatureCanvasEngine();
+    adjustClientFieldsVisibility();
     return;
   }
   
   document.getElementById('a-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('sheets-url').value = sheetsURL;
+  document.getElementById('sb-url').value = supabaseUrl;
+  document.getElementById('sb-key').value = supabaseKey;
   genPass();
   loadCachedConfig();
   startTimerSystem();
   updateLinks();
   updateTrack();
-  renderHistory();
+  initSupabaseDriver();
+}
+
+function initSupabaseDriver() {
+  const badge = document.getElementById('cloud-sync-status-msg');
+  if(supabaseUrl && supabaseKey) {
+    try {
+      supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+      badge.textContent = "⚡️ Connected to Live Supabase Backend Service Loop Grid Hub Engine.";
+      badge.style.color = "var(--green)";
+    } catch(e) {
+      badge.textContent = "❌ Supabase configuration initialization driver fault.";
+      badge.style.color = "var(--red)";
+    }
+  } else {
+    badge.textContent = "⚠️ Standalone Local Mode Active. Map variables inside Cloud Tab to mount persistent tracking infrastructure.";
+    badge.style.color = "var(--amber)";
+  }
+}
+
+function saveSupabaseConfiguration() {
+  supabaseUrl = document.getElementById('sb-url').value.trim();
+  supabaseKey = document.getElementById('sb-key').value.trim();
+  localStorage.setItem('ahsu_sb_url', supabaseUrl);
+  localStorage.setItem('ahsu_sb_key', supabaseKey);
+  showToast("Supabase credentials cached.");
+  initSupabaseDriver();
+}
+
+// CANVAS DRAWING SIGNATURE SYSTEM DEPLOYMENT
+function initSignatureCanvasEngine() {
+  sigCanvas = document.getElementById('signature-canvas');
+  if(!sigCanvas) return;
+  sigCtx = sigCanvas.getContext('2d');
+  
+  // Set dimensions based on layout containment elements
+  sigCanvas.width = sigCanvas.offsetWidth;
+  sigCanvas.height = sigCanvas.offsetHeight;
+  
+  sigCtx.strokeStyle = "#0F3460";
+  sigCtx.lineWidth = 2.5;
+  sigCtx.lineCap = "round";
+  
+  // Pointer Event Track Mapping for Finger/Stylus/Mouse
+  sigCanvas.addEventListener('mousedown', startDrawingTrack);
+  sigCanvas.addEventListener('mousemove', drawStrokeTrack);
+  window.addEventListener('mouseup', stopDrawingTrack);
+  
+  sigCanvas.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    const rect = sigCanvas.getBoundingClientRect();
+    isDrawing = true;
+    sigCtx.beginPath();
+    sigCtx.moveTo(t.clientX - rect.left, t.clientY - rect.top);
+    e.preventDefault();
+  }, { passive: false });
+  
+  sigCanvas.addEventListener('touchmove', (e) => {
+    if(!isDrawing) return;
+    const t = e.touches[0];
+    const rect = sigCanvas.getBoundingClientRect();
+    sigCtx.lineTo(t.clientX - rect.left, t.clientY - rect.top);
+    sigCtx.stroke();
+    e.preventDefault();
+  }, { passive: false });
+  
+  window.addEventListener('touchend', () => isDrawing = false);
+}
+
+function startDrawingTrack(e) {
+  isDrawing = true;
+  const rect = sigCanvas.getBoundingClientRect();
+  sigCtx.beginPath();
+  sigCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+function drawStrokeTrack(e) {
+  if(!isDrawing) return;
+  const rect = sigCanvas.getBoundingClientRect();
+  sigCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  sigCtx.stroke();
+}
+function stopDrawingTrack() { isDrawing = false; }
+function clearSignaturePadMatrix() { if(sigCtx && sigCanvas) sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); }
+
+function adjustClientFieldsVisibility() {
+  const role = document.getElementById('cli-role').value;
+  const idRow = document.getElementById('cli-id-row');
+  if(role === 'Faculty') {
+    idRow.style.display = "none";
+  } else {
+    idRow.style.display = "block";
+  }
 }
 
 function loadCachedConfig() {
   try {
-    const dataString = localStorage.getItem(ns('session_v2'));
+    const dataString = localStorage.getItem(ns('session_v3_sig'));
     if (dataString) {
       const data = JSON.parse(dataString);
-      document.getElementById('a-course').value = data.course || 'Obstetrics anesthesia';
-      document.getElementById('a-code').value = data.code || 'SEM4';
+      document.getElementById('a-course').value = data.course || 'Introduction to Public Health';
+      document.getElementById('a-code').value = data.code || 'IPH 101';
       document.getElementById('a-date').value = data.date || document.getElementById('a-date').value;
-      document.getElementById('a-time').value = data.time || '08:00';
-      document.getElementById('a-lec').value = data.lecturer || 'Dr Niyotwiringira';
-      document.getElementById('a-fac').value = data.facilitator || 'Dr Sandrine Gbia';
-      document.getElementById('a-expected').value = data.expectedPool || '21';
+      document.getElementById('a-time').value = data.time || '09:00';
+      document.getElementById('a-lec').value = data.lecturer || 'Dr. Uwimana';
+      document.getElementById('a-expected').value = data.expectedPool || '25';
       document.getElementById('a-pass').value = data.password || '';
       membersRoster = Array.isArray(data.people) ? data.people : [];
     }
@@ -389,12 +423,11 @@ function persistState() {
     date: document.getElementById('a-date').value,
     time: document.getElementById('a-time').value,
     lecturer: document.getElementById('a-lec').value,
-    facilitator: document.getElementById('a-fac').value,
     expectedPool: document.getElementById('a-expected').value,
     password: document.getElementById('a-pass').value,
     people: membersRoster
   };
-  localStorage.setItem(ns('session_v2'), JSON.stringify(meta));
+  localStorage.setItem(ns('session_v3_sig'), JSON.stringify(meta));
 }
 
 function adminTab(p) {
@@ -443,10 +476,10 @@ function genPass() {
 
 function updateLinks() {
   const origin = window.location.origin + window.location.pathname;
-  const pay = `c=${encodeURIComponent(document.getElementById('a-course').value)}&cd=${encodeURIComponent(document.getElementById('a-code').value)}&d=${encodeURIComponent(document.getElementById('a-date').value)}&t=${encodeURIComponent(document.getElementById('a-time').value)}&l=${encodeURIComponent(document.getElementById('a-lec').value)}&f=${encodeURIComponent(document.getElementById('a-fac').value)}&p=${encodeURIComponent(document.getElementById('a-pass').value)}`;
+  const pay = `c=${encodeURIComponent(document.getElementById('a-course').value)}&cd=${encodeURIComponent(document.getElementById('a-code').value)}&d=${encodeURIComponent(document.getElementById('a-date').value)}&t=${encodeURIComponent(document.getElementById('a-time').value)}&l=${encodeURIComponent(document.getElementById('a-lec').value)}&p=${encodeURIComponent(document.getElementById('a-pass').value)}`;
   const out = `${origin}?${pay}`;
   document.getElementById('session-link').textContent = out;
-  document.getElementById('wa-template').textContent = `*AHSU Secure Verification System*\nCourse: ${document.getElementById('a-course').value}\nPasskey: *${document.getElementById('a-pass').value}*\nPortal Entry:\n${out}`;
+  document.getElementById('wa-template').textContent = `*AHSU Signature Attendance System*\nCourse: ${document.getElementById('a-course').value}\nPasskey: *${document.getElementById('a-pass').value}*\nPortal Entry Link:\n${out}`;
 }
 
 function copyLink() { navigator.clipboard.writeText(document.getElementById('session-link').textContent); showToast('Link saved!'); }
@@ -454,17 +487,18 @@ function copyWA() { navigator.clipboard.writeText(document.getElementById('wa-te
 
 function addPersonRecord() {
   const n = document.getElementById('s-name'); const id = document.getElementById('s-id'); const r = document.getElementById('s-role');
-  if(!n.value.trim() || !id.value.trim()) return;
-  membersRoster.push({ name: n.value.trim(), id: id.value.trim().toUpperCase(), role: r.value, signed: false, time: null });
+  if(!n.value.trim() || (r.value === 'Resident' && !id.value.trim())) return;
+  const generatedId = r.value === 'Faculty' ? 'FAC-' + Math.floor(1000 + Math.random() * 9000) : id.value.trim().toUpperCase();
+  membersRoster.push({ name: n.value.trim(), id: generatedId, role: r.value, signed: false, time: null, signatureData: null });
   n.value = ''; id.value = ''; renderRosterDOM(); updateTrack(); persistState();
 }
 
 function loadSample() {
   membersRoster = [
-    { name: "Christian MUGISHA", id: "MM-OB-2024-006", role: "Resident", signed: false, time: null },
-    { name: "Marie Therese Mutuyimana", id: "MM-OB-2024-009", role: "Resident", signed: false, time: null },
-    { name: "Balkachew Kabtyimer", id: "AHSUFAC01", role: "Faculty", signed: false, time: null },
-    { name: "Dr Salau Jelili Olaide", id: "AHSUFAC02", role: "Faculty", signed: false, time: null }
+    { name: "Mugisha Eric", id: "AHSU2026001", role: "Resident", signed: false, time: null, signatureData: null },
+    { name: "Keza Aline", id: "AHSU2026002", role: "Resident", signed: false, time: null, signatureData: null },
+    { name: "Uwase Marie", id: "AHSU2026003", role: "Resident", signed: false, time: null, signatureData: null },
+    { name: "Professor Balkachew K.", id: "FAC-9012", role: "Faculty", signed: false, time: null, signatureData: null }
   ];
   renderRosterDOM(); updateTrack(); persistState();
 }
@@ -474,7 +508,7 @@ function renderRosterDOM() {
   membersRoster.forEach((p, idx) => {
     html += `<div class="srow"><div class="av">${p.role === 'Faculty' ? '🎓' : '👤'}</div><div style="flex:1;"><div class="sname">${p.name} <span class="smeta">(${p.id}) [${p.role}]</span></div></div><button class="btn btn-danger btn-sm" onclick="dropRosterItem(${idx})">Drop</button></div>`;
   });
-  document.getElementById('stu-list').innerHTML = html || '<p style="color:var(--gray-400); font-size:12px;">No active roster rows mapping.</p>';
+  document.getElementById('stu-list').innerHTML = html || '<p style="color:var(--gray-400); font-size:12px;">No active roster data mapped.</p>';
 }
 function dropRosterItem(idx) { membersRoster.splice(idx,1); renderRosterDOM(); updateTrack(); persistState(); }
 
@@ -493,32 +527,29 @@ function updateTrack() {
 }
 
 function renderSplitTables(ds) {
-  const query = document.getElementById('registry-search').value.toLowerCase().trim();
-  const records = ds.filter(p => p.name.toLowerCase().includes(query) || p.id.toLowerCase().includes(query));
-  
-  const residents = records.filter(p => p.role === 'Resident');
-  const faculty = records.filter(p => p.role === 'Faculty');
+  const residents = ds.filter(p => p.role === 'Resident');
+  const faculty = ds.filter(p => p.role === 'Faculty');
   
   let resHtml = '';
-  if(!residents.length) resHtml = `<tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No matching residents dataset.</td></tr>`;
+  if(!residents.length) resHtml = `<tr><td colspan="5" style="color:var(--gray-400); text-align:center;">No matching residents dataset.</td></tr>`;
   else {
     residents.forEach(p => {
-      resHtml += `<tr><td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.signed ? '<span class="badge b-signed">✓ Present</span>' : '<span class="badge b-absent">Absent</span>'}</td><td>${p.time || '—'}</td></tr>`;
+      const sigImg = p.signatureData ? `<img src="${p.signatureData}" class="sig-render-img" />` : `<span style="color:var(--gray-400); font-style:italic; font-size:12px;">Missing</span>`;
+      resHtml += `<tr><td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.signed ? '<span class="badge b-signed">✓ Present</span>' : '<span class="badge b-absent">Absent</span>'}</td><td>${sigImg}</td><td>${p.time || '—'}</td></tr>`;
     });
   }
   document.getElementById('resident-tbody-logs').innerHTML = resHtml;
 
   let facHtml = '';
-  if(!faculty.length) facHtml = `<tr><td colspan="4" style="color:var(--gray-400); text-align:center;">No matching faculty dataset.</td></tr>`;
+  if(!faculty.length) facHtml = `<tr><td colspan="3" style="color:var(--gray-400); text-align:center;">No matching faculty dataset.</td></tr>`;
   else {
     faculty.forEach(p => {
-      facHtml += `<tr><td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.signed ? '<span class="badge b-faculty">✓ Logged</span>' : '<span class="badge b-absent">Absent</span>'}</td><td>${p.time || '—'}</td></tr>`;
+      const sigImg = p.signatureData ? `<img src="${p.signatureData}" class="sig-render-img" />` : `<span style="color:var(--gray-400); font-style:italic; font-size:12px;">Missing</span>`;
+      facHtml += `<tr><td><strong>${p.name}</strong></td><td>${sigImg}</td><td>${p.time || '—'}</td></tr>`;
     });
   }
   document.getElementById('faculty-tbody-logs').innerHTML = facHtml;
 }
-
-function filterRegistryLogs() { renderSplitTables(membersRoster); }
 
 async function submitClientSignature() {
   const params = new URLSearchParams(window.location.search);
@@ -527,24 +558,35 @@ async function submitClientSignature() {
   const role = document.getElementById('cli-role').value;
   const pass = document.getElementById('cli-pass').value.trim().toUpperCase();
   
-  if(!name || !id || !pass) { alert("All verification parameters are mandatory."); return; }
+  if(!name || !pass) { alert("All verification parameter inputs are mandatory."); return; }
+  if(role === 'Resident' && !id) { alert("Resident tracking ID code is mandatory."); return; }
   if(pass !== params.get('p').toUpperCase()) { alert("Security validation token index mismatch."); return; }
   
-  const sessionToken = params.get('cd') + '-' + params.get('d');
+  // Convert Canvas Content to lightweight Base64 string data stream vector
+  const signatureDataUrl = sigCanvas.toDataURL();
   const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const payload = { action: 'push', sessionKey: sessionToken, id: id, name: name, role: role, time: timeString };
+  const sessionToken = params.get('cd') + '-' + params.get('d');
   
-  if(sheetsURL) {
+  const generatedRecordId = role === 'Faculty' ? 'FAC-' + Math.floor(1000 + Math.random() * 9000) : id;
+
+  if(supabaseClient) {
     try {
-      await fetch(sheetsURL, { method: 'POST', mode: 'cors', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
-    } catch(e){}
+      await supabaseClient.from('attendance_logs').insert([{
+        session_key: sessionToken,
+        member_id: generatedRecordId,
+        full_name: name,
+        role: role,
+        timestamp: timeString,
+        signature_vector: signatureDataUrl
+      }]);
+    } catch(e){ console.error("Cloud backend pipeline drop down error instance", e); }
   }
   
-  let match = membersRoster.find(x => x.id.toUpperCase() === id.toUpperCase());
+  let match = membersRoster.find(x => x.id.toUpperCase() === generatedRecordId.toUpperCase() || (role === 'Faculty' && x.name.toLowerCase() === name.toLowerCase()));
   if(!match) {
-    membersRoster.push({ name: name, id: id, role: role, signed: true, time: timeString });
+    membersRoster.push({ name: name, id: generatedRecordId, role: role, signed: true, time: timeString, signatureData: signatureDataUrl });
   } else {
-    match.signed = true; match.time = timeString;
+    match.signed = true; match.time = timeString; match.signatureData = signatureDataUrl;
   }
   persistState();
   
@@ -552,95 +594,45 @@ async function submitClientSignature() {
   document.getElementById('client-success-area').className = "active";
 }
 
-async function refreshFromSheets() {
-  if(!sheetsURL) return;
+async function refreshFromSupabase() {
+  if(!supabaseClient) return;
   try {
-    const key = document.getElementById('a-code').value + '-' + document.getElementById('a-date').value;
-    const res = await fetch(sheetsURL, { method: 'POST', mode: 'cors', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'pull', sessionKey: key }) });
-    const payload = JSON.parse(await res.text());
-    if(payload && payload.status === 'success' && Array.isArray(payload.records)) {
-      let mut = false;
-      payload.records.forEach(r => {
-        let match = membersRoster.find(x => x.id.toUpperCase() === r.id.trim().toUpperCase());
-        if(!match) { membersRoster.push({ id: r.id, name: r.name, role: r.role || 'Resident', signed: true, time: r.time }); mut = true; }
-        else if(!match.signed) { match.signed = true; match.time = r.time; mut = true; }
+    const sessionToken = document.getElementById('a-code').value + '-' + document.getElementById('a-date').value;
+    const { data, error } = await supabaseClient.from('attendance_logs').select('*').eq('session_key', sessionToken);
+    
+    if(data && !error) {
+      let mutated = false;
+      data.forEach(cloudRow => {
+        let match = membersRoster.find(x => x.id.toUpperCase() === cloudRow.member_id.toUpperCase() || (cloudRow.role === 'Faculty' && x.name.toLowerCase() === cloudRow.full_name.toLowerCase()));
+        if(!match) {
+          membersRoster.push({ id: cloudRow.member_id, name: cloudRow.full_name, role: cloudRow.role, signed: true, time: cloudRow.timestamp, signatureData: cloudRow.signature_vector });
+          mutated = true;
+        } else if(!match.signed) {
+          match.signed = true; match.time = cloudRow.timestamp; match.signatureData = cloudRow.signature_vector;
+          mutated = true;
+        }
       });
-      if(mut) {
-        try {
-          if(document.getElementById('cfg-audio-chime').checked) {
+      if(mutated) {
+        if(document.getElementById('cfg-audio-chime').checked) {
+          try {
             let actx = new (window.AudioContext || window.webkitAudioContext)();
-            let osc = actx.createOscillator(); osc.connect(actx.destination); osc.start(); osc.stop(actx.currentTime + 0.2);
-          }
-        }catch(e){}
+            let osc = actx.createOscillator(); osc.connect(actx.destination); osc.start(); osc.stop(actx.currentTime + 0.15);
+          } catch(e){}
+        }
         persistState(); updateTrack();
       }
     }
   } catch(e){}
 }
-setInterval(refreshFromSheets, 9000);
-
-function saveSheetsConfigurationLink() {
-  sheetsURL = document.getElementById('sheets-url').value.trim();
-  localStorage.setItem('ahsu_GEN_sheets_url', sheetsURL);
-  showToast("Cloud sync endpoint link secured.");
-  document.getElementById('cloud-sync-status-msg').textContent = "⚡️ Active Gateway Pipeline: Cloud Sheets Connected.";
-}
-
-// COMPILER GENERATION STRATEGIES CONFORMING TO THE OFFICIAL AHSU HOD VERIFICATION CORES
-function generateOfficialHoDSignOffPDF() {
-  document.getElementById('pdf-meta-course').textContent = document.getElementById('a-course').value;
-  document.getElementById('pdf-meta-code').textContent = document.getElementById('a-code').value;
-  document.getElementById('pdf-meta-date').textContent = document.getElementById('a-date').value;
-  document.getElementById('pdf-meta-time').textContent = document.getElementById('a-time').value;
-  document.getElementById('pdf-meta-lec').textContent = document.getElementById('a-lec').value;
-  document.getElementById('pdf-meta-fac').textContent = document.getElementById('a-fac').value;
-  document.getElementById('pdf-meta-expected').textContent = document.getElementById('st-expected-val').textContent + " Enrolled";
-  document.getElementById('pdf-meta-rate').textContent = document.getElementById('st-rate').textContent;
-  
-  const residents = membersRoster.filter(p => p.role === 'Resident');
-  const faculty = membersRoster.filter(p => p.role === 'Faculty');
-  
-  let facRows = '';
-  if(!faculty.length) facRows = `<tr><td colspan="4" style="text-align:center; color:#555;">No Faculty parameters logged.</td></tr>`;
-  else {
-    faculty.forEach((p, index) => {
-      facRows += `<tr><td>${index + 1}</td><td><strong>${p.name}</strong></td><td>${p.signed ? 'PRESENT' : 'ABSENT'}</td><td>${p.time || '—'}</td></tr>`;
-    });
-  }
-  document.getElementById('pdf-faculty-tbody').innerHTML = facRows;
-
-  let resRows = '';
-  if(!residents.length) resRows = `<tr><td colspan="5" style="text-align:center; color:#555;">No Resident records located.</td></tr>`;
-  else {
-    residents.forEach((p, index) => {
-      resRows += `<tr><td>${index + 1}</td><td><strong>${p.name}</strong></td><td>${p.id}</td><td>${p.signed ? 'PRESENT' : 'ABSENT'}</td><td>${p.time || '—'}</td></tr>`;
-    });
-  }
-  document.getElementById('pdf-resident-tbody').innerHTML = resRows;
-  
-  const element = document.getElementById('hod-pdf-template');
-  const options = {
-    margin: [15, 12, 18, 12],
-    filename: `AHSU_Attendance_Register_${document.getElementById('a-code').value}.pdf`,
-    image: { type: 'jpeg', quality: 0.99 },
-    html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  
-  showToast("Compiling verification PDF register sheet...");
-  html2pdf().set(options).from(element).save().then(() => {
-    showToast("PDF report generated successfully!");
-  });
-}
+setInterval(refreshFromSupabase, 10000);
 
 function exportCSV() {
   const m = [['Role', 'ID', 'Name', 'Status', 'Time']];
   membersRoster.forEach(p => m.push([p.role, p.id, p.name, p.signed?'Present':'Absent', p.time||'—']));
   const csv = m.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
-  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.setAttribute("download", `Data.csv`); a.click();
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.setAttribute("download", `Register_Export.csv`); a.click();
 }
-function clearSession() { localStorage.removeItem(ns('session_v2')); membersRoster = []; init(); }
-function renderHistory() { document.getElementById('history-list').innerHTML = '<p style="color:var(--gray-400); font-size:12px; padding:6px;">Archives synchronized.</p>'; }
+function clearSession() { localStorage.removeItem(ns('session_v3_sig')); membersRoster = []; init(); }
 function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2200); }
 function printQRCodeModule() { window.print(); }
 
